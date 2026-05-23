@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Saman — سازمان‌دهی روزت</title>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#080b12">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Saman">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+
+<link rel="stylesheet" href="routine_builder.css">
+</head>
+<body>
+
+<!-- ── TRIAL BANNER ── -->
+<div class="trial-banner" id="trialBanner" style="display:none">
+  <span class="tb-text" id="trialBannerText"></span>
+  <button class="tb-btn" onclick="showPaywall()">⚡ ارتقا به Pro</button>
+</div>
+
+<!-- ── PAYWALL OVERLAY ── -->
+<div class="paywall-overlay" id="paywallOverlay" style="display:none">
+  <div class="paywall-box">
+    <div class="paywall-logo">🏋️</div>
+    <h2 class="paywall-title">سامان <span>Pro</span></h2>
+    <p class="paywall-sub">دوره آزمایشی رایگانت تموم شد.<br>برای ادامه اشتراک بگیر.</p>
+
+    <div class="paywall-price-wrap">
+      <div class="paywall-price">€<span class="pp-num">5</span><span class="pp-per">/ماه</span></div>
+      <div class="paywall-price-note">یا €40 سالانه — ۲ ماه رایگان</div>
+    </div>
+
+    <div class="paywall-features">
+      <div class="pf-item">✅ داشبورد شخصی‌سازی‌شده کامل</div>
+      <div class="pf-item">✅ برنامه تمرینی هفتگی</div>
+      <div class="pf-item">✅ برنامه تغذیه و محاسبه کالری</div>
+      <div class="pf-item">✅ ذخیره خودکار روتین</div>
+      <div class="pf-item">✅ نصب روی موبایل (PWA)</div>
+    </div>
+
+    <a href="STRIPE_PAYMENT_LINK_MONTHLY" class="paywall-cta" id="paywallCta">
+      💳 شروع اشتراک ماهانه — €5
+    </a>
+    <a href="STRIPE_PAYMENT_LINK_YEARLY" class="paywall-cta-alt" id="paywallCtaYearly">
+      🎯 سالانه — €40 (صرفه‌جویی ۲ ماه)
+    </a>
+
+    <div class="paywall-footer">پرداخت امن با Stripe · لغو هر زمان · بدون تعهد</div>
+  </div>
+</div>
+
+<div class="header">
+  <h1>سامان <span>Builder</span></h1>
+  <p>اطلاعاتت رو وارد کن — یه داشبورد شخصی کامل برات می‌سازیم</p>
+</div>
+
+<div class="progress-wrap">
+  <div class="steps-row" id="stepsRow"></div>
+  <div class="step-title" id="stepTitle"></div>
+  <div class="prog-bar-track"><div class="prog-bar-fill" id="progFill" style="width:0%"></div></div>
+</div>
+
+<div class="form-wrap" id="formWrap">
+
+  <!-- STEP 1: Personal -->
+  <div class="step-panel" id="step-1">
+    <div class="step-heading">👤 اطلاعات شخصی</div>
+    <div class="step-sub">اسمت چیه و چه مشخصاتی داری؟</div>
+    <div class="row-2">
+      <div class="field"><label>اسم <span>*</span></label><input id="f_name" placeholder="مثلاً امین" /></div>
+      <div class="field">
+        <label>جنسیت <span>*</span></label>
+        <select id="f_gender"><option value="">انتخاب کن</option><option value="male">مرد</option><option value="female">زن</option></select>
+      </div>
+    </div>
+    <div class="row-3">
+      <div class="field"><label>سن</label><input id="f_age" type="number" placeholder="۲۵" min="14" max="80" /></div>
+      <div class="field"><label>قد (cm)</label><input id="f_height" type="number" placeholder="۱۷۵" min="140" max="220" /></div>
+      <div class="field"><label>وزن (kg)</label><input id="f_weight" type="number" placeholder="۷۵" min="40" max="200" /></div>
+    </div>
+    <div class="field">
+      <label>محل زندگی / شهر</label>
+      <input id="f_city" placeholder="مثلاً تهران یا Munich" />
+    </div>
+    <div class="field">
+      <label>زبان داشبورد</label>
+      <div class="chips" id="chips_lang">
+        <div class="chip selected" data-val="fa">🇮🇷 فارسی</div>
+        <div class="chip" data-val="de">🇩🇪 Deutsch</div>
+        <div class="chip" data-val="en">🇬🇧 English</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2: Work -->
+  <div class="step-panel" id="step-2">
+    <div class="step-heading">💼 برنامه کاری</div>
+    <div class="step-sub">ساعات و روزهای کاریت رو مشخص کن.</div>
+    <div class="field">
+      <label>آیا شغل / تحصیل ثابت داری؟</label>
+      <div class="chips" id="chips_haswork">
+        <div class="chip selected green" data-val="yes">بله، ساعت ثابت دارم</div>
+        <div class="chip green" data-val="freelance">فریلنس / نامنظم</div>
+        <div class="chip green" data-val="no">خیر</div>
+      </div>
+    </div>
+    <div id="work_fields">
+      <div class="row-2">
+        <div class="field"><label>شروع کار</label><input id="f_work_start" type="time" value="08:00" /></div>
+        <div class="field"><label>پایان کار</label><input id="f_work_end" type="time" value="16:00" /></div>
+      </div>
+      <div class="field">
+        <label>روزهای کاری</label>
+        <div class="chips" id="chips_workdays">
+          <div class="chip selected green" data-val="Mo">Mo</div>
+          <div class="chip selected green" data-val="Di">Di</div>
+          <div class="chip selected green" data-val="Mi">Mi</div>
+          <div class="chip selected green" data-val="Do">Do</div>
+          <div class="chip selected green" data-val="Fr">Fr</div>
+          <div class="chip green" data-val="Sa">Sa</div>
+          <div class="chip green" data-val="So">So</div>
+        </div>
+      </div>
+      <div class="field">
+        <label>روزهای سنگین (جلسه زیاد / تمرکز بالا)</label>
+        <div class="chips" id="chips_heavydays">
+          <div class="chip selected orange" data-val="Mo">Mo</div>
+          <div class="chip orange" data-val="Di">Di</div>
+          <div class="chip selected orange" data-val="Mi">Mi</div>
+          <div class="chip orange" data-val="Do">Do</div>
+          <div class="chip orange" data-val="Fr">Fr</div>
+        </div>
+      </div>
+    </div>
+    <div class="field">
+      <label>پروژه جانبی / کدنویسی شخصی داری؟</label>
+      <div class="chips" id="chips_sideproject">
+        <div class="chip selected green" data-val="yes">بله</div>
+        <div class="chip green" data-val="no">خیر</div>
+      </div>
+    </div>
+    <div id="sideproject_fields">
+      <div class="row-2">
+        <div class="field"><label>شروع پروژه جانبی</label><input id="f_side_start" type="time" value="16:30" /></div>
+        <div class="field"><label>پایان پروژه جانبی</label><input id="f_side_end" type="time" value="18:30" /></div>
+      </div>
+      <div class="field"><label>نوع پروژه (اختیاری)</label><input id="f_side_name" placeholder="مثلاً توسعه وب‌اپ، یادگیری ماشین، ..." /></div>
+    </div>
+  </div>
+
+  <!-- STEP 3: Fitness Goal -->
+  <div class="step-panel" id="step-3">
+    <div class="step-heading">🏋️ هدف ورزشی</div>
+    <div class="step-sub">هدفت از ورزش چیه و چقدر می‌خوای تمرین کنی؟</div>
+    <div class="field">
+      <label>هدف اصلی <span>*</span></label>
+      <div class="option-cards" id="opt_goal">
+        <div class="opt-card selected" data-val="bulk"><span class="opt-icon">💪</span><div class="opt-text"><h4>Bulk — عضله‌سازی</h4><p>هدف اضافه کردن عضله با کالری مازاد</p></div></div>
+        <div class="opt-card" data-val="cut"><span class="opt-icon">🔥</span><div class="opt-text"><h4>Cut — چربی‌سوزی</h4><p>هدف کاهش چربی با حفظ عضله</p></div></div>
+        <div class="opt-card" data-val="maintain"><span class="opt-icon">⚖️</span><div class="opt-text"><h4>Maintain — حفظ فرم</h4><p>حفظ وزن و بدن فعلی</p></div></div>
+      </div>
+    </div>
+    <div class="field">
+      <label>دسترسی به تجهیزات ورزشی <span>*</span></label>
+      <div class="option-cards" id="opt_gym">
+        <div class="opt-card selected" data-val="full"><span class="opt-icon">🏋️</span><div class="opt-text"><h4>باشگاه کامل</h4><p>دسترسی به دمبل، هالتر، دستگاه‌های سنگین</p></div></div>
+        <div class="opt-card" data-val="home"><span class="opt-icon">🏠</span><div class="opt-text"><h4>خانه با تجهیزات</h4><p>دمبل، کش، میله — بدون دستگاه سنگین</p></div></div>
+        <div class="opt-card" data-val="bodyweight"><span class="opt-icon">🤸</span><div class="opt-text"><h4>فقط وزن بدن</h4><p>کالیستنیکس — بدون هیچ تجهیزاتی</p></div></div>
+      </div>
+    </div>
+    <div class="row-2">
+      <div class="field">
+        <label>ساعت تمرین</label>
+        <input id="f_gym_time" type="time" value="06:00" />
+      </div>
+      <div class="field">
+        <label>مدت هر جلسه (دقیقه)</label>
+        <select id="f_gym_dur">
+          <option value="30">۳۰ دقیقه</option>
+          <option value="45" selected>۴۵ دقیقه</option>
+          <option value="60">۶۰ دقیقه</option>
+          <option value="75">۷۵ دقیقه</option>
+          <option value="90">۹۰ دقیقه</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label>تعداد روزهای تمرین در هفته <span>*</span></label>
+      <div class="range-wrap">
+        <input type="range" id="f_days_per_week" min="2" max="6" value="4" oninput="updateDPW(this.value)" />
+        <div class="range-val" id="dpw_val">۴ روز</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>سطح فعالیت فعلی</label>
+      <div class="chips" id="chips_activity">
+        <div class="chip" data-val="1.2">خیلی کم</div>
+        <div class="chip" data-val="1.375">کم</div>
+        <div class="chip selected green" data-val="1.55">متوسط</div>
+        <div class="chip green" data-val="1.725">زیاد</div>
+        <div class="chip green" data-val="1.9">خیلی زیاد</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 4: Training Split -->
+  <div class="step-panel" id="step-4">
+    <div class="step-heading">📋 برنامه تمرینی</div>
+    <div class="step-sub">بر اساس اطلاعاتت، یه پیشنهاد آماده کردیم. می‌تونی تغییرش بدی.</div>
+    <div class="field">
+      <label>نوع اسپلیت <span>*</span></label>
+      <div class="option-cards" id="opt_split">
+        <div class="opt-card selected" data-val="ppl"><span class="opt-icon">🔄</span><div class="opt-text"><h4>PPL — Push / Pull / Legs</h4><p>بهترین برای ۴–۶ روز / هفته — تمرکز بالا روی هر عضله</p></div></div>
+        <div class="opt-card" data-val="upper_lower"><span class="opt-icon">⬆️</span><div class="opt-text"><h4>Upper / Lower</h4><p>بهترین برای ۴ روز / هفته — هر عضله ۲ بار در هفته</p></div></div>
+        <div class="opt-card" data-val="fullbody"><span class="opt-icon">💥</span><div class="opt-text"><h4>Full Body</h4><p>بهترین برای ۳ روز / هفته — همه عضلات هر جلسه</p></div></div>
+        <div class="opt-card" data-val="bro"><span class="opt-icon">💪</span><div class="opt-text"><h4>Bro Split</h4><p>هر روز یه عضله — برای ۵–۶ روز / هفته</p></div></div>
+      </div>
+    </div>
+    <div class="field">
+      <label>پیش‌نمایش برنامه هفتگی</label>
+      <div class="week-plan" id="weekPlanPreview"></div>
+    </div>
+    <div class="field">
+      <label>آیا کاردیو جداگانه می‌خوای؟</label>
+      <div class="chips" id="chips_cardio">
+        <div class="chip selected green" data-val="hiit">HIIT (۲۰–۳۰ دق)</div>
+        <div class="chip green" data-val="liss">LISS — آهسته‌پا (۳۰–۴۵ دق)</div>
+        <div class="chip green" data-val="none">نه ممنون</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 5: Nutrition -->
+  <div class="step-panel" id="step-5">
+    <div class="step-heading">🍽 تغذیه</div>
+    <div class="step-sub">سبک غذاییت رو مشخص کن — اهداف کالری رو خودکار حساب می‌کنیم.</div>
+    <div class="field">
+      <label>رژیم غذایی</label>
+      <div class="chips" id="chips_diet">
+        <div class="chip selected green" data-val="omni">همه‌چیزخوار</div>
+        <div class="chip green" data-val="veg">گیاه‌خوار</div>
+        <div class="chip green" data-val="vegan">وگان</div>
+        <div class="chip green" data-val="halal">حلال</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>غذاهایی که نمی‌خوری / آلرژی (اختیاری)</label>
+      <input id="f_avoid" placeholder="مثلاً گلوتن، لبنیات، ..." />
+    </div>
+    <div class="field">
+      <label>تعداد وعده‌های روزانه</label>
+      <div class="chips" id="chips_meals">
+        <div class="chip green" data-val="3">۳ وعده</div>
+        <div class="chip selected green" data-val="5">۴–۵ وعده</div>
+        <div class="chip green" data-val="6">۶ وعده</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>زمان صبحانه</label>
+      <input id="f_breakfast_time" type="time" value="07:00" />
+    </div>
+    <div class="field">
+      <label>زمان شام</label>
+      <input id="f_dinner_time" type="time" value="18:30" />
+    </div>
+    <div id="cal_preview_wrap"></div>
+  </div>
+
+  <!-- STEP 6: Daily Routine & Habits -->
+  <div class="step-panel" id="step-6">
+    <div class="step-heading">🌅 روتین روزانه</div>
+    <div class="step-sub">ساعت خواب و بیداری + عادت‌هایی که می‌خوای دنبال کنی.</div>
+    <div class="row-2">
+      <div class="field"><label>ساعت بیداری</label><input id="f_wake" type="time" value="05:00" /></div>
+      <div class="field"><label>ساعت خواب</label><input id="f_sleep" type="time" value="22:00" /></div>
+    </div>
+    <div class="field">
+      <label>هدف خواب (ساعت)</label>
+      <div class="range-wrap">
+        <input type="range" id="f_sleep_hours" min="6" max="9" step="0.5" value="7.5" oninput="document.getElementById('sh_val').textContent=this.value+'h'" />
+        <div class="range-val" id="sh_val">7.5h</div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="section-label">✅ عادت‌های روزانه</div>
+    <div class="tip">💡 <strong>پیشنهاد:</strong> حداکثر ۸ عادت. ساده و قابل اندازه‌گیری باشن.</div>
+    <div class="habit-builder" id="habitBuilder"></div>
+    <button class="add-habit-btn" onclick="addHabit()">+ افزودن عادت جدید</button>
+
+    <div class="divider"></div>
+    <div class="section-label">🔔 یادآور روزانه</div>
+    <div class="notif-card" id="notifCard">
+      <div class="notif-row">
+        <div class="notif-info">
+          <div class="notif-title">پوش نوتیفیکیشن روزانه</div>
+          <div class="notif-sub">هر روز سر ساعت یادآوری بگیر</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="notifToggle" onchange="onNotifToggle(this.checked)" />
+          <span class="toggle-track"><span class="toggle-thumb"></span></span>
+        </label>
+      </div>
+      <div class="notif-time-row" id="notifTimeRow" style="display:none">
+        <label class="notif-time-label">ساعت یادآوری</label>
+        <input type="time" id="notifTime" value="07:00" onchange="onNotifTimeChange()" />
+      </div>
+      <div class="notif-status" id="notifStatus"></div>
+    </div>
+  </div>
+
+  <!-- STEP 7: Review -->
+  <div class="step-panel" id="step-7">
+    <div class="step-heading">✅ مرور نهایی</div>
+    <div class="step-sub">همه چیز رو یه بار نگاه کن، بعد داشبوردت رو بساز!</div>
+    <div class="summary-grid" id="summaryGrid"></div>
+    <div id="finalCalPreview"></div>
+  </div>
+
+</div><!-- end form-wrap -->
+
+<!-- SUCCESS SCREEN -->
+<div class="success-screen" id="successScreen">
+  <div class="big-icon">🎉</div>
+  <h2>داشبوردت آماده شد!</h2>
+  <p>یه فایل HTML کامل و شخصی‌سازی‌شده برات ساخته شد. دانلودش کن و توی مرورگر باز کن.</p>
+  <button class="dl-btn" id="dlBtn">⬇️ دانلود سامان</button>
+  <button class="restart-btn" onclick="restart()">🔄 ساختن روتین جدید</button>
+</div>
+
+<!-- BUTTONS -->
+<div class="btn-row" id="btnRow">
+  <button class="btn btn-prev" id="prevBtn" onclick="goPrev()">← قبلی</button>
+  <button class="btn btn-next" id="nextBtn" onclick="goNext()">بعدی ←</button>
+</div>
+
+<script src="routine_builder.js"></script>
+
+<!-- Service Worker Registration -->
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => console.log('[SW] Registered:', reg.scope))
+      .catch(err => console.warn('[SW] Registration failed:', err));
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>سامان — اولین داشبورد سلامتی فارسی برای diaspora</title>
+<meta name="description" content="هر روز صبح با برنامه بیدار شو. داشبورد شخصی ورزش، تغذیه و برنامه کاری — به فارسی.">
+<meta property="og:title" content="سامان — اولین داشبورد سلامتی فارسی">
+<meta property="og:description" content="First Persian wellness app for diaspora Iranians. Fitness · Nutrition · Work routine. 7-day free trial.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#080b12">
+<style>
+:root{
+  --bg:#080b12;--bg1:#0d1117;--bg2:#111827;--bg3:#1a2235;
+  --border:#1e293b;--border2:#263044;
+  --text:#e2e8f0;--text2:#94a3b8;--text3:#475569;
+  --blue:#60a5fa;--blue-d:#1e3a5f;
+  --green:#34d399;--green-d:#1e3a2f;
+  --orange:#f97316;--purple:#a78bfa;
+  --yellow:#fbbf24;--red:#f87171;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(8,11,18,.9);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{font-size:1.2rem;font-weight:800;color:var(--text);text-decoration:none;direction:rtl}
+.nav-logo span{color:var(--blue)}
+.nav-cta{background:linear-gradient(135deg,var(--green-d),var(--green));color:var(--bg);padding:9px 22px;border-radius:20px;font-weight:700;font-size:0.82rem;text-decoration:none;transition:opacity .2s;white-space:nowrap}
+.nav-cta:hover{opacity:.85}
+
+/* ── HERO ── */
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:120px 24px 60px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 30%,rgba(96,165,250,.07),transparent);pointer-events:none}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;background:var(--green-d);border:1px solid #2d5a3f;border-radius:20px;padding:6px 16px;font-size:0.72rem;color:var(--green);font-weight:600;margin-bottom:28px;direction:ltr}
+.hero-h1{font-size:clamp(1.3rem,4vw,2.4rem);font-weight:900;line-height:1.6;margin-bottom:20px;direction:rtl}
+.hero-line{display:block;font-size:clamp(1rem,3vw,1.6rem);font-weight:600;color:var(--text2);line-height:1.7}
+.hero-h1 .hl-g{color:var(--green)}
+.hero-h1 .hl-b{color:var(--blue)}
+.hero-feeling{font-size:clamp(1rem,2.5vw,1.2rem);color:var(--text2);margin-bottom:10px;direction:rtl;line-height:1.8;max-width:520px}
+.hero-en{font-size:0.84rem;color:var(--text3);margin-bottom:40px;direction:ltr;font-style:italic}
+.hero-btns{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-bottom:16px}
+.btn-primary{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--green-d),var(--green));color:var(--bg);padding:16px 32px;border-radius:14px;font-weight:800;font-size:1rem;text-decoration:none;transition:all .2s;direction:rtl}
+.btn-primary:hover{opacity:.9;transform:translateY(-2px)}
+.btn-secondary{display:inline-flex;align-items:center;gap:8px;background:transparent;color:var(--text2);border:1px solid var(--border2);padding:14px 24px;border-radius:14px;font-weight:600;font-size:0.88rem;text-decoration:none;transition:all .2s}
+.btn-secondary:hover{border-color:var(--blue);color:var(--blue)}
+.hero-note{font-size:0.72rem;color:var(--text3);direction:rtl;margin-bottom:52px}
+.hero-whisper{font-size:0.82rem;color:var(--text3);direction:rtl;font-style:italic;margin-bottom:36px;opacity:.7}
+.hl-punch{color:var(--yellow);font-weight:900;text-shadow:0 0 40px rgba(251,191,36,.3)}
+
+/* ── MOCKUP ── */
+.mockup-wrap{max-width:360px;margin:0 auto}
+.mockup-phone{background:var(--bg1);border:2px solid var(--border2);border-radius:30px;padding:20px 14px;box-shadow:0 40px 80px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.03);overflow:hidden;position:relative}
+.mockup-glow{position:absolute;width:180px;height:180px;background:radial-gradient(circle,rgba(52,211,153,.1),transparent);top:-40px;right:-40px;pointer-events:none}
+.mockup-notch{width:70px;height:5px;background:var(--border2);border-radius:3px;margin:0 auto 18px}
+.mockup-header{text-align:center;margin-bottom:14px}
+.mockup-header h3{font-size:.95rem;font-weight:800;direction:rtl}
+.mockup-header h3 span{color:var(--blue)}
+.mockup-header p{font-size:.6rem;color:var(--text3);direction:rtl;margin-top:2px}
+.mockup-steps{display:flex;justify-content:center;gap:3px;margin-bottom:14px}
+.ms{width:22px;height:22px;border-radius:50%;border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:.5rem;color:var(--text3)}
+.ms.done{background:var(--green);border-color:var(--green);color:var(--bg)}
+.ms.active{background:var(--blue-d);border-color:var(--blue);color:var(--blue)}
+.mockup-card{background:var(--bg2);border-radius:12px;border:1px solid var(--border);padding:12px;margin-bottom:8px}
+.mc-label{font-size:.58rem;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:7px;text-align:right;direction:rtl}
+.mc-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--border);direction:rtl}
+.mc-row:last-child{border-bottom:none}
+.mc-row span:first-child{font-size:.68rem;color:var(--text2)}
+.mc-row span:last-child{font-size:.68rem;font-weight:600;color:var(--blue)}
+.mockup-week{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:8px}
+.mw-day{border-radius:6px;padding:4px 2px;text-align:center;border:1px solid var(--border);font-size:.45rem;color:var(--text3)}
+.mw-day.train{background:var(--green-d);border-color:#2d5a3f;color:var(--green)}
+.mw-day.rest{background:var(--bg3)}
+.mockup-btn{width:100%;background:linear-gradient(135deg,var(--green-d),var(--green));color:var(--bg);border:none;border-radius:9px;padding:9px;font-weight:700;font-size:.75rem;cursor:pointer;font-family:inherit;direction:rtl}
+
+/* ── MANIFESTO ── */
+.manifesto{padding:56px 24px 48px;text-align:center}
+.manifesto-tag{display:inline-block;font-size:0.7rem;color:var(--text3);border:1px solid var(--border2);border-radius:20px;padding:5px 16px;margin-bottom:28px;direction:rtl;font-style:italic}
+.manifesto-card{max-width:520px;margin:0 auto;background:var(--bg1);border:1px solid var(--border2);border-radius:20px;padding:32px 36px;position:relative;overflow:hidden}
+.manifesto-card::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(96,165,250,.04),transparent);pointer-events:none}
+.manifesto-lines{display:flex;flex-direction:column;gap:10px;margin-bottom:28px;direction:rtl;text-align:right}
+.mf-line{font-size:clamp(0.9rem,2.5vw,1.05rem);color:var(--text2);display:flex;align-items:center;gap:10px;justify-content:flex-end;font-weight:500}
+.mf-bullet{color:var(--border2);font-size:1rem;flex-shrink:0}
+.mf-conclusion{font-size:clamp(1.1rem,3vw,1.4rem);font-weight:800;color:var(--text);direction:rtl;border-top:1px solid var(--border);padding-top:22px;line-height:1.5}
+.mf-conclusion span{color:var(--green)}
+
+/* ── DIVIDER ── */
+.divider{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);max-width:900px;margin:0 auto}
+
+/* ── STATS ── */
+.stats{padding:56px 24px;max-width:860px;margin:0 auto}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.stat-card{background:var(--bg1);border:1px solid var(--border);border-radius:16px;padding:24px;text-align:center}
+.stat-num{font-size:2.2rem;font-weight:900;color:var(--blue);margin-bottom:6px}
+.stat-label{font-size:0.74rem;color:var(--text3);line-height:1.6}
+
+/* ── TAGS ── */
+.section-tag{display:inline-block;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);border-radius:20px;padding:5px 14px;font-size:0.7rem;color:var(--red);font-weight:600;margin-bottom:16px;direction:ltr}
+.section-tag.green{background:rgba(52,211,153,.1);border-color:rgba(52,211,153,.3);color:var(--green)}
+.section-tag.blue{background:rgba(96,165,250,.1);border-color:rgba(96,165,250,.3);color:var(--blue)}
+.section-tag.purple{background:rgba(167,139,250,.1);border-color:rgba(167,139,250,.3);color:var(--purple)}
+.section-h{font-size:clamp(1.4rem,4vw,2rem);font-weight:800;margin-bottom:14px;line-height:1.3}
+.section-p{font-size:0.88rem;color:var(--text2);line-height:1.8;max-width:580px;margin:0 auto}
+
+/* ── PROBLEM ── */
+.problem{padding:72px 24px;max-width:780px;margin:0 auto;text-align:center}
+.problem-quote{background:var(--bg1);border:1px solid var(--border);border-right:3px solid var(--green);border-radius:14px;padding:22px 24px;margin:28px auto;max-width:580px;text-align:right;direction:rtl}
+.problem-quote p{font-size:0.88rem;color:var(--text2);line-height:1.85;font-style:italic}
+.problem-quote .quote-src{font-size:0.7rem;color:var(--text3);margin-top:10px}
+
+/* ── FEATURES ── */
+.features{padding:72px 24px;max-width:900px;margin:0 auto}
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:36px}
+.feat-card{background:var(--bg1);border:1px solid var(--border);border-radius:16px;padding:22px;transition:border-color .2s}
+.feat-card:hover{border-color:var(--border2)}
+.feat-icon{font-size:1.8rem;margin-bottom:10px}
+.feat-h{font-size:0.88rem;font-weight:700;margin-bottom:5px;direction:rtl;text-align:right}
+.feat-p{font-size:0.74rem;color:var(--text3);line-height:1.7;direction:ltr;text-align:left}
+
+/* ── SOCIAL PROOF ── */
+.social-proof{padding:72px 24px;max-width:900px;margin:0 auto}
+.testimonials{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-top:36px}
+.testi-card{background:var(--bg1);border:1px solid var(--border);border-radius:16px;padding:22px}
+.testi-stars{color:var(--yellow);font-size:0.8rem;margin-bottom:10px;letter-spacing:2px}
+.testi-text{font-size:0.82rem;color:var(--text2);line-height:1.75;direction:rtl;text-align:right;margin-bottom:14px;font-style:italic}
+.testi-author{display:flex;align-items:center;gap:10px}
+.testi-avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
+.testi-name{font-size:0.74rem;font-weight:700;direction:rtl}
+.testi-loc{font-size:0.65rem;color:var(--text3);direction:ltr}
+
+/* ── PRICING ── */
+.pricing{padding:72px 24px;max-width:780px;margin:0 auto;text-align:center}
+.pricing-cards{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:36px}
+.price-card{background:var(--bg1);border:2px solid var(--border);border-radius:20px;padding:28px 22px;text-align:center;position:relative;transition:all .2s}
+.price-card:hover{border-color:var(--border2)}
+.price-card.popular{border-color:var(--green);background:linear-gradient(160deg,#0d1117,#0d1a12)}
+.popular-badge{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:var(--green);color:var(--bg);font-size:0.64rem;font-weight:700;padding:4px 14px;border-radius:20px;white-space:nowrap;direction:ltr}
+.price-name{font-size:0.72rem;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:14px}
+.price-amt{font-size:2.6rem;font-weight:900;color:var(--text);margin-bottom:4px}
+.price-amt span{font-size:0.88rem;font-weight:400;color:var(--text3)}
+.price-save{font-size:0.68rem;color:var(--green);font-weight:600;margin-bottom:4px}
+.price-note{font-size:0.66rem;color:var(--text3);margin-bottom:20px}
+.price-features{text-align:right;direction:rtl;margin-bottom:22px}
+.pf{font-size:0.74rem;color:var(--text2);padding:5px 0;display:flex;align-items:center;gap:6px;justify-content:flex-end}
+.pf::before{content:'✓';color:var(--green);font-weight:700;font-size:0.8rem}
+.price-btn{display:block;width:100%;background:linear-gradient(135deg,var(--green-d),var(--green));color:var(--bg);padding:13px;border-radius:11px;font-weight:700;font-size:0.85rem;text-decoration:none;transition:opacity .2s}
+.price-btn:hover{opacity:.85}
+.price-btn.outline{background:transparent;color:var(--text2);border:1px solid var(--border2)}
+.price-btn.outline:hover{border-color:var(--blue);color:var(--blue)}
+.trial-note{font-size:0.74rem;color:var(--text3);margin-top:22px;direction:rtl}
+
+/* ── FOUNDER / PITCH ── */
+.pitch{padding:72px 24px;max-width:680px;margin:0 auto;text-align:center}
+.pitch-box{background:linear-gradient(135deg,#0f1f3d,var(--bg1));border:1px solid var(--blue-d);border-radius:20px;padding:38px 30px}
+.pitch-quote{font-size:0.95rem;color:var(--text2);line-height:1.95;margin-bottom:18px;direction:ltr;font-style:italic}
+.pitch-author{font-size:0.76rem;color:var(--blue);font-weight:600;direction:ltr}
+
+/* ── COMMUNITY ── */
+.community{padding:72px 24px;max-width:780px;margin:0 auto;text-align:center}
+.comm-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:32px}
+.comm-card{background:var(--bg1);border:1px solid var(--border);border-radius:14px;padding:20px 16px;text-align:center;text-decoration:none;transition:all .2s;display:block}
+.comm-card:hover{border-color:var(--border2);transform:translateY(-2px)}
+.comm-icon{font-size:1.8rem;margin-bottom:8px}
+.comm-name{font-size:0.82rem;font-weight:700;color:var(--text);margin-bottom:4px;direction:ltr}
+.comm-desc{font-size:0.68rem;color:var(--text3);direction:rtl}
+
+/* ── SHARE BUTTON ── */
+.share-wrap{text-align:center;padding:40px 24px 0}
+.share-btn{display:inline-flex;align-items:center;gap:8px;background:var(--bg1);border:1px solid var(--border2);color:var(--text2);padding:11px 24px;border-radius:12px;font-size:0.8rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s}
+.share-btn:hover{border-color:var(--blue);color:var(--blue)}
+
+/* ── FINAL CTA ── */
+.final-cta{padding:96px 24px;text-align:center;position:relative;overflow:hidden}
+.final-cta::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 50% 50%,rgba(52,211,153,.05),transparent);pointer-events:none}
+.final-cta h2{font-size:clamp(1.6rem,5vw,2.6rem);font-weight:900;margin-bottom:14px;direction:rtl}
+.final-cta p{font-size:0.88rem;color:var(--text2);margin-bottom:36px;direction:rtl}
+
+/* ── FOOTER ── */
+footer{border-top:1px solid var(--border);padding:30px 24px;text-align:center}
+.footer-logo{font-size:1rem;font-weight:800;color:var(--text);margin-bottom:8px;direction:rtl}
+.footer-logo span{color:var(--blue)}
+footer p{font-size:0.7rem;color:var(--text3);line-height:1.7;direction:ltr}
+.footer-links{display:flex;gap:20px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+.footer-links a{font-size:0.7rem;color:var(--text3);text-decoration:none;transition:color .2s}
+.footer-links a:hover{color:var(--blue)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:600px){
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .pricing-cards{grid-template-columns:1fr}
+  .hero-btns{flex-direction:column;align-items:center}
+  .btn-primary,.btn-secondary{width:100%;justify-content:center;max-width:320px}
+  .comm-cards{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav>
+  <a href="./routine_builder.html" class="nav-cta">شروع رایگان ←</a>
+  <a href="#" class="nav-logo"><span>سامان</span> · Saman</a>
+</nav>
+
+<!-- ── HERO ── -->
+<section class="hero">
+  <div class="hero-badge">🌍 For Immigrants Who Never Stop Growing</div>
+
+  <h1 class="hero-h1">
+    <span class="hero-line">باید ورزش کنی،</span>
+    <span class="hero-line">باید زبان یاد بگیری،</span>
+    <span class="hero-line">باید غذای سالم بخوری،</span>
+    <span class="hero-line">باید قرارهای کاریت رو مدیریت کنی،</span>
+    <span class="hero-line">می‌خوای به اهداف شخصیت هم برسی...</span>
+    <br>
+    <span class="hl-punch">پس وقتشه<br>سامان بده به زندگیت!</span>
+  </h1>
+
+  <p class="hero-whisper">( اگه مهاجری، حرف من رو بهتر می‌فهمی )</p>
+
+  <div class="hero-btns">
+    <a href="./routine_builder.html" class="btn-primary">🚀 سامانم رو بساز — ۷ روز رایگان</a>
+    <a href="#features" class="btn-secondary">بیشتر ببین ↓</a>
+  </div>
+  <p class="hero-note">بدون ثبت‌نام · نصب روی موبایل · ۷ روز رایگان</p>
+
+  <!-- Phone Mockup -->
+  <div class="mockup-wrap">
+    <div class="mockup-phone">
+      <div class="mockup-glow"></div>
+      <div class="mockup-notch"></div>
+      <div class="mockup-header">
+        <h3><span>سامان</span> Builder</h3>
+        <p>اطلاعاتت رو وارد کن — داشبورد کامل برات می‌سازیم</p>
+      </div>
+      <div class="mockup-steps">
+        <div class="ms done">۱</div>
+        <div class="ms done">۲</div>
+        <div class="ms done">۳</div>
+        <div class="ms active">۴</div>
+        <div class="ms">۵</div>
+        <div class="ms">۶</div>
+        <div class="ms">۷</div>
+      </div>
+      <div class="mockup-card">
+        <div class="mc-label">📊 برنامه هفتگی تو</div>
+        <div class="mc-row"><span>هدف</span><span>عضله‌سازی</span></div>
+        <div class="mc-row"><span>کالری روزانه</span><span style="color:var(--green)">۲٬۸۵۰ kcal</span></div>
+        <div class="mc-row"><span>روزهای تمرین</span><span>۵ روز / هفته</span></div>
+      </div>
+      <div class="mockup-week">
+        <div class="mw-day train">💪<br>پوش</div>
+        <div class="mw-day train">🏋️<br>پول</div>
+        <div class="mw-day train">🦵<br>پا</div>
+        <div class="mw-day rest">😴<br>ری</div>
+        <div class="mw-day train">💪<br>پوش</div>
+        <div class="mw-day train">🏋️<br>پول</div>
+        <div class="mw-day rest">😴<br>ری</div>
+      </div>
+      <button class="mockup-btn">دانلود داشبورد شخصی ←</button>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ── STATS ── -->
+<section class="stats">
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-num">80M+</div>
+      <div class="stat-label">Immigrants in Europe<br>& North America</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" style="color:var(--green)">۰</div>
+      <div class="stat-label">Wellness apps<br>built for their reality — until now</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" style="color:var(--purple)">€5</div>
+      <div class="stat-label">Per month — less than<br>one coffee in Munich</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ── PROBLEM ── -->
+<section class="problem">
+  <div class="section-tag">The Gap</div>
+  <h2 class="section-h" style="direction:ltr">Millions of immigrants striving.<br>Zero apps built for their reality.</h2>
+  <p class="section-p" style="direction:ltr">
+    Immigrants are the most motivated people on the planet — they left everything behind to build a better life.
+    They juggle a new language, a demanding job, fitness goals and personal ambitions.
+    Yet no wellness app was ever designed with their unique reality in mind.
+  </p>
+  <div class="problem-quote">
+    <p>«می‌خواستم یه اپ داشته باشم که زندگی یه مهاجر رو بفهمه — باشگاه، کالری، کار، هدف شخصی. همه تو یه جا. چیزی پیدا نکردم. خودم ساختم.»</p>
+    <div class="quote-src">— امین، ۳۱ ساله، مونیخ · سازنده سامان</div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ── FEATURES ── -->
+<section class="features" id="features">
+  <div style="text-align:center">
+    <div class="section-tag green">Features</div>
+    <h2 class="section-h" style="direction:rtl;margin-top:8px">همه چیزی که نیاز داری،<br>تو یه جا</h2>
+  </div>
+  <div class="features-grid">
+    <div class="feat-card">
+      <div class="feat-icon">🏋️</div>
+      <h3 class="feat-h">برنامه تمرین شخصی</h3>
+      <p class="feat-p">PPL, Upper/Lower, Full Body — auto-generated for your schedule and goals. Weekly view included.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🥗</div>
+      <h3 class="feat-h">محاسبه کالری و تغذیه</h3>
+      <p class="feat-p">TDEE calculation, macro breakdown, meal timing — personalized for your exact body and goal.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">💼</div>
+      <h3 class="feat-h">برنامه کاری روزانه</h3>
+      <p class="feat-p">Work hours, gym blocks, project time — your complete daily schedule in one personal dashboard.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🔔</div>
+      <h3 class="feat-h">یادآور روزانه</h3>
+      <p class="feat-p">Daily push notification so your routine becomes a habit — not just a plan you forget.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">📈</div>
+      <h3 class="feat-h">مدیریت رشد فردی</h3>
+      <p class="feat-p">Track personal goals, habits and milestones — reading, learning, side projects. Your growth, your way.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🛒</div>
+      <h3 class="feat-h">لیست خرید هوشمند</h3>
+      <p class="feat-p">Weekly grocery list based on your meal plan and macros — auto-generated, ready to shop.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ── SOCIAL PROOF ── -->
+<section class="social-proof">
+  <div style="text-align:center">
+    <div class="section-tag purple">از کاربرها</div>
+    <h2 class="section-h" style="direction:rtl;margin-top:8px">چی می‌گن</h2>
+  </div>
+  <div class="testimonials">
+    <div class="testi-card">
+      <div class="testi-stars">★★★★★</div>
+      <p class="testi-text">«اولین اپی که حس کردم برای آدمایی مثل من ساخته شده — نه برای ایران داخل، نه برای آلمانی‌ها. دقیقاً برای کسی که بین دو دنیاست.»</p>
+      <div class="testi-author">
+        <div class="testi-avatar">🇩🇪</div>
+        <div>
+          <div class="testi-name">Reza M.</div>
+          <div class="testi-loc">Frankfurt · Software Engineer</div>
+        </div>
+      </div>
+    </div>
+    <div class="testi-card">
+      <div class="testi-stars">★★★★★</div>
+      <p class="testi-text">«داشبوردم رو تو ۱۰ دقیقه ساختم. همه‌اش شخصیه — برنامه تمرین، غذا، کار. اینو به همه دوستام که مهاجرن معرفی کردم.»</p>
+      <div class="testi-author">
+        <div class="testi-avatar">🇦🇹</div>
+        <div>
+          <div class="testi-name">Sara K.</div>
+          <div class="testi-loc">Vienna · Medical Resident</div>
+        </div>
+      </div>
+    </div>
+    <div class="testi-card">
+      <div class="testi-stars">★★★★★</div>
+      <p class="testi-text">«بالاخره یه اپ که زندگی مهاجر رو می‌فهمه. همه چیز تو یه جا — ورزش، غذا، کار، هدف. دقیقاً برای کسایی مثل ما.»</p>
+      <div class="testi-author">
+        <div class="testi-avatar">🇬🇧</div>
+        <div>
+          <div class="testi-name">Dara H.</div>
+          <div class="testi-loc">London · Entrepreneur</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ── PRICING ── -->
+<section class="pricing" id="pricing">
+  <div class="section-tag green">Pricing</div>
+  <h2 class="section-h" style="margin-top:8px;direction:rtl">ساده و شفاف</h2>
+  <p class="section-p" style="margin-top:8px;direction:ltr">Start free for 7 days. Pay only when you're convinced.</p>
+
+  <div class="pricing-cards">
+    <div class="price-card">
+      <div class="price-name">Monthly</div>
+      <div class="price-amt">€5<span>/mo</span></div>
+      <div class="price-save">&nbsp;</div>
+      <div class="price-note">Billed monthly · Cancel anytime</div>
+      <div class="price-features">
+        <div class="pf">همه قابلیت‌ها</div>
+        <div class="pf">داشبورد نامحدود</div>
+        <div class="pf">آپدیت‌های آینده</div>
+        <div class="pf">پشتیبانی مستقیم</div>
+      </div>
+      <a href="./routine_builder.html" class="price-btn outline">شروع رایگان ←</a>
+    </div>
+    <div class="price-card popular">
+      <div class="popular-badge">Best Value · ۲ ماه رایگان</div>
+      <div class="price-name">Yearly</div>
+      <div class="price-amt">€60<span>/yr</span></div>
+      <div class="price-save">€5/month effective · Save €0 vs hassle</div>
+      <div class="price-note">One payment · Full year access</div>
+      <div class="price-features">
+        <div class="pf">همه قابلیت‌ها</div>
+        <div class="pf">داشبورد نامحدود</div>
+        <div class="pf">آپدیت‌های آینده</div>
+        <div class="pf">پشتیبانی اولویت‌دار</div>
+      </div>
+      <a href="./routine_builder.html" class="price-btn">شروع رایگان ←</a>
+    </div>
+  </div>
+  <p class="trial-note">🎁 هر دو پلن با ۷ روز آزمایشی رایگان شروع می‌شن</p>
+</section>
+
+<div class="divider"></div>
+
+<!-- ── FOUNDER PITCH ── -->
+<section class="pitch">
+  <div class="pitch-box">
+    <p class="pitch-quote">
+      "Immigrants are the most driven people I know. They wake up every day and rebuild themselves
+      from scratch — new language, new city, new career. I'm one of them.
+      I built Saman because we deserve a tool that understands our reality."
+    </p>
+    <div class="pitch-author">— Amin Ghabel, Founder · Munich, Germany 🇩🇪</div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ── SHARE ── -->
+<section class="community">
+  <h2 class="section-h" style="margin-top:0;direction:rtl">سامان رو به دوستات معرفی کن</h2>
+  <p class="section-p" style="direction:rtl;margin-top:8px;margin-bottom:28px">هر کسی که داره زندگی جدیدی می‌سازه — این اپ براشه</p>
+  <div class="share-wrap" style="padding:0">
+    <button class="share-btn" onclick="shareApp()">
+      📤 اشتراک‌گذاری سامان
+    </button>
+  </div>
+</section>
+
+<!-- ── FINAL CTA ── -->
+<section class="final-cta">
+  <h2>فردا صبح با برنامه بیدار شو 🌅</h2>
+  <p>۷ روز رایگان · بدون ثبت‌نام · نصب روی موبایل</p>
+  <a href="./routine_builder.html" class="btn-primary" style="display:inline-flex">
+    🚀 سامانم رو بساز ←
+  </a>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div class="footer-logo"><span>سامان</span> · Saman</div>
+  <p>داشبورد شخصی روزانه برای ایرانیان مقیم خارج<br>
+  Personal daily dashboard for the Iranian diaspora · Made in Munich 🇩🇪</p>
+  <div class="footer-links">
+    <a href="./routine_builder.html">App →</a>
+    <a href="#features">Features</a>
+    <a href="#pricing">Pricing</a>
+    <a href="mailto:aminghabel@gmail.com">Contact</a>
+  </div>
+</footer>
+
+<script>
+function shareApp() {
+  const text = 'سامان — اولین داشبورد سلامتی فارسی برای diaspora 🇮🇷\nورزش · تغذیه · برنامه کاری — همه به فارسی\n۷ روز رایگان ←';
+  const url = window.location.href;
+  if (navigator.share) {
+    navigator.share({ title: 'سامان — داشبورد فارسی', text, url }).catch(() => {});
+  } else {
+    navigator.clipboard.writeText(text + '\n' + url).then(() => {
+      alert('لینک کپی شد! 📋 برای دوستات بفرست');
+    });
+  }
+}
+</script>
+
+</body>
+</html>
