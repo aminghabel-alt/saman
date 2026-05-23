@@ -490,23 +490,10 @@ function goPrev() {
 function generateHub() {
   const data = collectData();
   const html = buildHTML(data);
-
-  // Paywall state ro negah dar — baad az document.write ham bemanad
-  const paidState = localStorage.getItem(PAID_KEY);
-  const trialState = localStorage.getItem(TRIAL_KEY);
-  const notifState = localStorage.getItem(NOTIF_KEY);
-
-  // Generated HTML ro to document benevis — hamin tab, no download
-  document.open();
-  document.write(html);
-  document.close();
-
-  // Paywall state restore kon to new document
-  try {
-    if (paidState) localStorage.setItem(PAID_KEY, paidState);
-    if (trialState) localStorage.setItem(TRIAL_KEY, trialState);
-    if (notifState) localStorage.setItem(NOTIF_KEY, notifState);
-  } catch(e) {}
+  // Blob URL — fresh page, no JS scope conflict, no download
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  window.location.replace(url);
 }
 
 function collectData() {
@@ -678,8 +665,10 @@ body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:var(--bg);color:v
 <div class="header">
   <div class="header-top">
     <div class="header-title">سامان — ${d.name}</div>
-    <button onclick="window.location.href='routine_builder.html'" style="background:transparent;border:1px solid var(--border2);color:var(--text3);border-radius:8px;padding:4px 10px;font-size:0.65rem;font-family:inherit;cursor:pointer;white-space:nowrap">✏️ ویرایش</button>
-    <div class="header-date" id="headerDate"></div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <button onclick="window.location.href='routine_builder.html'" style="background:transparent;border:1px solid var(--border2);color:var(--text3);border-radius:8px;padding:4px 10px;font-size:0.65rem;font-family:inherit;cursor:pointer;white-space:nowrap">✏️ ویرایش</button>
+      <div class="header-date" id="headerDate"></div>
+    </div>
   </div>
   <div class="day-strip" id="dayStrip"></div>
 </div>
