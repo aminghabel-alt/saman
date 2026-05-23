@@ -490,10 +490,22 @@ function goPrev() {
 function generateHub() {
   const data = collectData();
   const html = buildHTML(data);
-  // Blob URL — fresh page, no JS scope conflict, no download
-  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  window.location.replace(url);
+
+  // Iframe ba srcdoc — no blob URL, kaar mikone az file:// va https:// ham
+  const iframe = document.createElement('iframe');
+  iframe.id = 'hubFrame';
+  iframe.srcdoc = html;
+  iframe.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;border:none;z-index:9999;background:#080b12;';
+  document.body.appendChild(iframe);
+
+  // Vaghti ویرایش ro mizane, iframe ro bezar va wizard ro neshoon bede
+  window.addEventListener('message', function onEdit(e) {
+    if (e.data === 'SAMAN_EDIT') {
+      document.getElementById('hubFrame')?.remove();
+      window.removeEventListener('message', onEdit);
+      showStep(currentStep);
+    }
+  });
 }
 
 function collectData() {
@@ -542,7 +554,7 @@ function collectData() {
   };
 }
 
-function buildHTML(d) {
+function buildHTML(d, baseUrl='') {
   const goalLabel = { bulk:'💪 Bulk — عضله‌سازی', cut:'🔥 Cut — چربی‌سوزی', maintain:'⚖️ Maintain' }[d.goal] || '💪 Bulk';
   const gymLabel = { full:'🏋️ باشگاه', home:'🏠 خانه', bodyweight:'🤸 وزن بدن' }[d.gymType] || '🏋️ باشگاه';
   const splitLabel = { ppl:'PPL', upper_lower:'Upper/Lower', fullbody:'Full Body', bro:'Bro Split' }[d.split] || 'PPL';
@@ -666,7 +678,7 @@ body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:var(--bg);color:v
   <div class="header-top">
     <div class="header-title">سامان — ${d.name}</div>
     <div style="display:flex;align-items:center;gap:8px">
-      <button onclick="window.location.href='routine_builder.html'" style="background:transparent;border:1px solid var(--border2);color:var(--text3);border-radius:8px;padding:4px 10px;font-size:0.65rem;font-family:inherit;cursor:pointer;white-space:nowrap">✏️ ویرایش</button>
+      <button onclick="window.parent.postMessage('SAMAN_EDIT','*')" style="background:transparent;border:1px solid var(--border2);color:var(--text3);border-radius:8px;padding:4px 10px;font-size:0.65rem;font-family:inherit;cursor:pointer;white-space:nowrap">✏️ ویرایش</button>
       <div class="header-date" id="headerDate"></div>
     </div>
   </div>
@@ -1031,9 +1043,24 @@ function init() {
   // Notifications — baad az restore state
   initNotifications();
 
-  // بازیابی وضعیت ذخیره‌شده — اگر وجود داشت از همان مرحله شروع کن
-  restoreState();
+  // ── Profile auto-load ──
+  // Agar ?edit=true nabashad va profile kamel dare → dashbord ro direct show bede
+  const params = new URLSearchParams(window.location.search);
+  const isEditMode = params.get('edit') === 'true';
+
+  const hasProfile = restoreState();
+
+  // Edit mode → URL ro pak kon
+  if (isEditMode) {
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+
   showStep(currentStep);
+
+  if (hasProfile && !isEditMode) {
+    // Profile dare → dashbord (iframe) ro show bede
+    generateHub();
+  }
 }
 
 init();
