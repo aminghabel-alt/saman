@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #0a0d14; color: #e2e8f0; direction: rtl; }
+
+  /* Header */
+  .header { background: linear-gradient(135deg, #0f1f3d 0%, #0f1117 100%); padding: 18px 20px 14px; border-bottom: 1px solid #1e2535; }
+  .header h1 { font-size: 1.15rem; color: #e2e8f0; font-weight: 700; }
+  .header .sub { font-size: 0.7rem; color: #475569; margin-top: 2px; }
+  .day-strip { display: flex; gap: 6px; margin-top: 12px; overflow-x: auto; padding-bottom: 2px; }
+  .day-btn { padding: 5px 12px; border-radius: 14px; border: 1px solid #1e2535; background: transparent; color: #64748b; cursor: pointer; font-size: 0.72rem; white-space: nowrap; transition: all 0.2s; flex-shrink: 0; }
+  .day-btn.active { background: #1e3a5f; color: #60a5fa; border-color: #2d5a8a; font-weight: 700; }
+  .day-btn.train { }
+  .day-btn.rest-d { }
+
+  /* Main layout */
+  .main { padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; }
+
+  /* Timeline */
+  .timeline-wrap { background: #0f1117; border-radius: 14px; border: 1px solid #1e2535; overflow: hidden; }
+  .section-label { font-size: 0.68rem; font-weight: 700; color: #475569; padding: 8px 14px 4px; letter-spacing: 0.05em; text-transform: uppercase; }
+  .timeline { display: flex; flex-direction: column; padding: 0 0 8px; }
+  .tblock { display: flex; align-items: stretch; gap: 0; position: relative; }
+  .tblock:hover .tblock-content { background: #141b2d; }
+  .time-col { width: 56px; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; padding: 6px 0; }
+  .time-txt { font-size: 0.6rem; color: #475569; white-space: nowrap; }
+  .time-line { flex: 1; width: 1px; background: #1e2535; margin: 2px 0; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin: 4px 0; }
+  .tblock-content { flex: 1; padding: 6px 10px 6px 6px; border-right: 2px solid transparent; margin: 2px 0; border-radius: 0 8px 8px 0; transition: background 0.15s; }
+  .tblock-icon { font-size: 0.9rem; float: right; margin-left: 6px; }
+  .tblock-title { font-size: 0.8rem; font-weight: 600; margin-bottom: 2px; }
+  .tblock-desc { font-size: 0.68rem; color: #64748b; line-height: 1.4; }
+  .tblock-tag { display: inline-block; font-size: 0.58rem; padding: 1px 6px; border-radius: 8px; margin-top: 3px; background: #0a0d14; border: 1px solid #1e2535; color: #94a3b8; }
+
+  /* Color coding */
+  .c-wake  { border-color: #6366f1; } .c-wake  .dot { background: #6366f1; } .c-wake  .tblock-title { color: #a5b4fc; }
+  .c-gym   { border-color: #f97316; } .c-gym   .dot { background: #f97316; } .c-gym   .tblock-title { color: #fb923c; }
+  .c-food  { border-color: #facc15; } .c-food  .dot { background: #facc15; } .c-food  .tblock-title { color: #fde047; }
+  .c-work  { border-color: #60a5fa; } .c-work  .dot { background: #60a5fa; } .c-work  .tblock-title { color: #93c5fd; }
+  .c-buf   { border-color: #a78bfa; } .c-buf   .dot { background: #a78bfa; } .c-buf   .tblock-title { color: #c4b5fd; }
+  .c-code  { border-color: #34d399; } .c-code  .dot { background: #34d399; } .c-code  .tblock-title { color: #6ee7b7; }
+  .c-free  { border-color: #475569; } .c-free  .dot { background: #475569; } .c-free  .tblock-title { color: #94a3b8; }
+  .c-sleep { border-color: #1e3a5f; } .c-sleep .dot { background: #2d4a8a; } .c-sleep .tblock-title { color: #60a5fa; }
+
+  /* Stats row */
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .stat-card { background: #0f1117; border-radius: 10px; padding: 10px 8px; text-align: center; border: 1px solid #1e2535; }
+  .stat-val { font-size: 1.05rem; font-weight: 700; }
+  .stat-lbl { font-size: 0.58rem; color: #475569; margin-top: 2px; }
+  .s-work { color: #60a5fa; }
+  .s-code { color: #34d399; }
+  .s-gym  { color: #f97316; }
+  .s-sleep{ color: #a78bfa; }
+
+  /* Cards */
+  .cards-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .info-card { background: #0f1117; border-radius: 12px; padding: 12px; border: 1px solid #1e2535; }
+  .info-card h3 { font-size: 0.75rem; color: #64748b; margin-bottom: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+  .meal-line { display: flex; align-items: center; gap: 8px; padding: 4px 0; border-bottom: 1px solid #0f1117; font-size: 0.75rem; }
+  .meal-line:last-child { border-bottom: none; }
+  .meal-time-sm { font-size: 0.62rem; color: #475569; min-width: 38px; }
+  .meal-name-sm { flex: 1; color: #cbd5e1; }
+  .meal-kcal { font-size: 0.62rem; color: #34d399; white-space: nowrap; }
+
+  .workout-line { display: flex; align-items: center; gap: 8px; padding: 4px 0; border-bottom: 1px solid #0f1117; font-size: 0.75rem; }
+  .workout-line:last-child { border-bottom: none; }
+  .ex-num { font-size: 0.6rem; color: #475569; min-width: 16px; }
+  .ex-name { flex: 1; color: #cbd5e1; }
+  .ex-sets { font-size: 0.62rem; color: #f97316; white-space: nowrap; }
+
+  /* Habit tracker */
+  .habits-card { background: #0f1117; border-radius: 12px; padding: 12px; border: 1px solid #1e2535; }
+  .habits-card h3 { font-size: 0.75rem; color: #64748b; margin-bottom: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+  .habit-row { display: flex; align-items: center; gap: 8px; padding: 5px 0; border-bottom: 1px solid #0f1117; }
+  .habit-row:last-child { border-bottom: none; }
+  .habit-check { width: 20px; height: 20px; border-radius: 5px; border: 2px solid #1e2535; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; flex-shrink: 0; transition: all 0.2s; }
+  .habit-check.done { background: #34d399; border-color: #34d399; color: #0a0d14; font-weight: 700; }
+  .habit-label { flex: 1; font-size: 0.75rem; color: #cbd5e1; }
+  .habit-icon { font-size: 0.85rem; }
+
+  /* Progress bar */
+  .prog-card { background: #0f1117; border-radius: 12px; padding: 12px; border: 1px solid #1e2535; }
+  .prog-card h3 { font-size: 0.75rem; color: #64748b; margin-bottom: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+  .prog-item { margin-bottom: 10px; }
+  .prog-item:last-child { margin-bottom: 0; }
+  .prog-header { display: flex; justify-content: space-between; font-size: 0.7rem; margin-bottom: 4px; }
+  .prog-name { color: #94a3b8; }
+  .prog-val { font-weight: 600; }
+  .prog-bar { height: 5px; background: #1e2535; border-radius: 3px; overflow: hidden; }
+  .prog-fill { height: 100%; border-radius: 3px; transition: width 0.5s; }
+
+  /* Week mini calendar */
+  .week-card { background: #0f1117; border-radius: 12px; padding: 12px; border: 1px solid #1e2535; }
+  .week-card h3 { font-size: 0.75rem; color: #64748b; margin-bottom: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+  .week-row-cal { display: flex; gap: 4px; }
+  .week-day-cal { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .wdc-label { font-size: 0.58rem; color: #475569; }
+  .wdc-dot { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; font-weight: 700; border: 1px solid #1e2535; cursor: pointer; transition: all 0.2s; }
+  .wdc-dot.today { border-color: #60a5fa; color: #60a5fa; }
+  .wdc-dot.train-day { background: #1e3a2f; color: #34d399; border-color: #2d5a3f; }
+  .wdc-dot.cardio-day { background: #2a1e1e; color: #f87171; border-color: #5a2d2d; }
+  .wdc-dot.rest-day2 { background: #1e2535; color: #475569; }
+  .wdc-dot.done-day { background: #34d399 !important; color: #0a0d14 !important; border-color: #34d399 !important; }
+  .wdc-type { font-size: 0.52rem; color: #475569; text-align: center; }
+
+  /* Notes */
+  .note-box { background: #0f1c2d; border: 1px solid #1e3a5f; border-radius: 10px; padding: 10px 12px; font-size: 0.75rem; color: #60a5fa; line-height: 1.7; }
+  .note-box strong { color: #93c5fd; }
+
+  .rest-note { background: #1a1a2e; border: 1px solid #2d2d5a; border-radius: 12px; padding: 16px; text-align: center; }
+  .rest-note .big { font-size: 2rem; margin-bottom: 8px; }
+  .rest-note h3 { font-size: 0.9rem; color: #a78bfa; margin-bottom: 6px; }
+  .rest-note p { font-size: 0.75rem; color: #64748b; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>📊 داشبورد روزانه</h1>
+  <div class="sub">کار ۸–۱۶ · وب‌اپ ۱۶:۳۰–۱۸:۳۰ · باشگاه ۶ صبح · آلمان</div>
+  <div class="day-strip" id="dayStrip"></div>
+</div>
+
+<div class="main" id="mainContent"></div>
+
+<script>
+const days = [
+  { de:'Mo', fa:'دوشنبه', type:'train', gym:'سینه + سه‌سر', gymColor:'#60a5fa',
+    exercises:[
+      { name:'پرس سینه هالتر', sets:'4×6-8' },
+      { name:'پرس دمبل زاویه‌دار', sets:'3×8-10' },
+      { name:'فلای دمبل', sets:'3×12' },
+      { name:'پشت بازو سیمکش', sets:'3×10-12' },
+      { name:'پشت بازو دمبل', sets:'3×12' },
+    ]
+  },
+  { de:'Di', fa:'سه‌شنبه', type:'train', gym:'پشت + دوسر', gymColor:'#34d399',
+    exercises:[
+      { name:'ددلیفت رومانیایی', sets:'4×6-8' },
+      { name:'زیربغل سیمکش', sets:'4×8-10' },
+      { name:'پشت بازو هالتر خم', sets:'3×10' },
+      { name:'جلو بازو هالتر', sets:'3×8-10' },
+      { name:'جلو بازو چکشی', sets:'3×12' },
+    ]
+  },
+  { de:'Mi', fa:'چهارشنبه', type:'cardio', gym:'کاردیو سبک', gymColor:'#f87171',
+    exercises:[
+      { name:'تردمیل / دوچرخه ثابت', sets:'20 دق' },
+      { name:'کشش کامل بدن', sets:'10 دق' },
+    ]
+  },
+  { de:'Do', fa:'پنج‌شنبه', type:'train', gym:'پا + شانه', gymColor:'#f97316',
+    exercises:[
+      { name:'اسکوات هالتر', sets:'4×6-8' },
+      { name:'پرس پا', sets:'3×10-12' },
+      { name:'ساق پا ایستاده', sets:'4×15' },
+      { name:'پرس سرشانه دمبل', sets:'3×10' },
+      { name:'نشر جانب دمبل', sets:'3×12-15' },
+    ]
+  },
+  { de:'Fr', fa:'جمعه', type:'cardio', gym:'HIIT + Core', gymColor:'#f87171',
+    exercises:[
+      { name:'HIIT تردمیل (8 راند)', sets:'16 دق' },
+      { name:'پلانک', sets:'3×max' },
+      { name:'کرانچ دوچرخه', sets:'3×20' },
+    ]
+  },
+  { de:'Sa', fa:'شنبه', type:'rest', gym:'استراحت کامل', gymColor:'#475569', exercises:[] },
+  { de:'So', fa:'یکشنبه', type:'rest-active', gym:'استراحت فعال', gymColor:'#475569', exercises:[] },
+];
+
+const meals = {
+  train: [
+    { time:'05:15', icon:'⚡', name:'پیش‌وعده ورزش', desc:'موز + کره بادام‌زمینی', kcal:'220' },
+    { time:'07:00', icon:'🍳', name:'صبحانه Post-Workout', desc:'تخم‌مرغ + جو دوسر + Skyr', kcal:'750' },
+    { time:'10:30', icon:'🥜', name:'میان‌وعده', desc:'Hüttenkäse + Vollkornbrot', kcal:'350' },
+    { time:'12:30', icon:'🥗', name:'ناهار', desc:'مرغ + برنج قهوه‌ای + قارچ', kcal:'620' },
+    { time:'15:30', icon:'🍎', name:'میان‌وعده ۲', desc:'Skyr + بلوبری + آجیل', kcal:'300' },
+    { time:'18:30', icon:'🍽', name:'شام', desc:'Räucherlachs + سیب‌زمینی + سالاد', kcal:'630' },
+    { time:'21:30', icon:'🌙', name:'Quark قبل خواب', desc:'Quark + عسل + دارچین', kcal:'200' },
+  ],
+  cardio: [
+    { time:'06:45', icon:'🥣', name:'صبحانه', desc:'تخم‌مرغ + جو دوسر + موز', kcal:'555' },
+    { time:'10:30', icon:'🥜', name:'میان‌وعده', desc:'Hüttenkäse + سیب', kcal:'230' },
+    { time:'12:30', icon:'🥗', name:'ناهار', desc:'مرغ + سیب‌زمینی + سبزیجات', kcal:'460' },
+    { time:'18:30', icon:'🍽', name:'شام', desc:'Räucherlachs + سالاد + نان', kcal:'540' },
+    { time:'21:30', icon:'🌙', name:'Quark', desc:'Quark + عسل', kcal:'160' },
+  ],
+  rest: [
+    { time:'08:00', icon:'🥞', name:'صبحانه آرام', desc:'تخم‌مرغ + نان + Hüttenkäse', kcal:'580' },
+    { time:'13:00', icon:'🍳', name:'ناهار', desc:'مرغ + قارچ + سبزیجات + برنج', kcal:'530' },
+    { time:'18:30', icon:'🍽', name:'شام', desc:'ماهی + سالاد + سیب‌زمینی شیرین', kcal:'590' },
+    { time:'21:30', icon:'🌙', name:'Quark', desc:'Quark + عسل + دارچین', kcal:'165' },
+  ],
+};
+
+const timeline = {
+  train: [
+    { time:'05:15', cls:'c-food',  icon:'⚡', title:'پیش‌وعده ورزش', desc:'موز + کره بادام‌زمینی', tag:null },
+    { time:'06:00', cls:'c-gym',   icon:'🏋️', title:'باشگاه', desc:'۴۵–۵۵ دقیقه', tag:'گرم‌کردن ۸ دقیقه فراموش نشه' },
+    { time:'07:00', cls:'c-food',  icon:'🍳', title:'صبحانه Post-Workout', desc:'تخم‌مرغ + جو دوسر + Skyr', tag:null },
+    { time:'08:00', cls:'c-work',  icon:'💼', title:'کار شرکت — Deep Work', desc:'سنگین‌ترین تسک‌ها. Pomodoro 50+10', tag:'موبایل ساکت' },
+    { time:'10:30', cls:'c-food',  icon:'🥜', title:'میان‌وعده', desc:'Hüttenkäse + Vollkornbrot', tag:null },
+    { time:'12:00', cls:'c-work',  icon:'💼', title:'کار شرکت — ادامه', desc:'جلسات + ایمیل + تسک‌های سبک‌تر', tag:null },
+    { time:'12:30', cls:'c-food',  icon:'🥗', title:'ناهار + پیاده‌روی', desc:'مرغ + برنج + قارچ — ۱۰ دق پیاده‌روی', tag:null },
+    { time:'15:30', cls:'c-food',  icon:'🍎', title:'میان‌وعده ۲', desc:'Skyr + بلوبری + آجیل', tag:null },
+    { time:'16:00', cls:'c-buf',   icon:'☕', title:'بافر / ریکاوری ذهنی', desc:'قهوه، هوا — بدون کد!', tag:'shift از کارمند به سازنده' },
+    { time:'16:30', cls:'c-code',  icon:'💻', title:'توسعه وب‌اپ — ۲ ساعت', desc:'یه تسک مشخص. commit بدون استثنا.', tag:'هدف = یه feature کوچیک' },
+    { time:'18:30', cls:'c-food',  icon:'🍽', title:'شام', desc:'Räucherlachs + سیب‌زمینی + سالاد', tag:null },
+    { time:'19:00', cls:'c-free',  icon:'🧘', title:'زمان آزاد', desc:'پادکست، کتاب، خانواده — بدون فشار', tag:null },
+    { time:'21:30', cls:'c-food',  icon:'🌙', title:'Quark قبل خواب', desc:'Quark + عسل + دارچین', tag:null },
+    { time:'22:00', cls:'c-sleep', icon:'🌙', title:'خواب — ۷.۵ ساعت', desc:'صفحه نمایش خاموش. غیرقابل معامله.', tag:null },
+  ],
+  cardio: [
+    { time:'06:00', cls:'c-gym',   icon:'🚴', title:'کاردیو سبک', desc:'تردمیل ۲۰ دق + کشش ۱۰ دق', tag:'ضربان قلب زیر ۱۳۰' },
+    { time:'06:45', cls:'c-food',  icon:'🥣', title:'صبحانه', desc:'تخم‌مرغ + جو دوسر + موز', tag:null },
+    { time:'08:00', cls:'c-work',  icon:'💼', title:'کار شرکت — Deep Work', desc:'سنگین‌ترین تسک‌ها', tag:'Pomodoro 50+10' },
+    { time:'10:30', cls:'c-food',  icon:'🥜', title:'میان‌وعده', desc:'Hüttenkäse + سیب', tag:null },
+    { time:'12:00', cls:'c-work',  icon:'💼', title:'کار شرکت — ادامه', desc:'جلسات + ایمیل', tag:null },
+    { time:'12:30', cls:'c-food',  icon:'🥗', title:'ناهار', desc:'مرغ + سیب‌زمینی + سبزیجات', tag:null },
+    { time:'16:00', cls:'c-buf',   icon:'☕', title:'بافر ذهنی', desc:'قهوه، هوا خوردن', tag:null },
+    { time:'16:30', cls:'c-code',  icon:'💻', title:'توسعه وب‌اپ — ۲ ساعت', desc:'یه تسک مشخص. commit بدون استثنا.', tag:'هدف = یه feature کوچیک' },
+    { time:'18:30', cls:'c-food',  icon:'🍽', title:'شام', desc:'Räucherlachs + سالاد + نان', tag:null },
+    { time:'19:00', cls:'c-free',  icon:'🧘', title:'زمان آزاد', desc:'پادکست، کتاب، دوستان', tag:null },
+    { time:'21:30', cls:'c-food',  icon:'🌙', title:'Quark', desc:'Quark + عسل', tag:null },
+    { time:'22:00', cls:'c-sleep', icon:'🌙', title:'خواب', desc:'۷.۵ ساعت', tag:null },
+  ],
+  rest: [
+    { time:'08:00', cls:'c-wake',  icon:'☀️', title:'بیدار شدن آزاد', desc:'بدون زنگ ساعت', tag:null },
+    { time:'09:00', cls:'c-food',  icon:'🥞', title:'صبحانه + Meal Prep', desc:'آماده‌سازی غذای هفته', tag:'شنبه = خرید + Meal Prep' },
+    { time:'13:00', cls:'c-food',  icon:'🍳', title:'ناهار', desc:'مرغ + قارچ + سبزیجات + برنج', tag:null },
+    { time:'15:00', cls:'c-free',  icon:'🚶', title:'پیاده‌روی / طبیعت', desc:'۳۰–۴۵ دقیقه — ریکاوری فعال', tag:null },
+    { time:'18:30', cls:'c-food',  icon:'🍽', title:'شام', desc:'ماهی تازه + سالاد + سیب‌زمینی شیرین', tag:null },
+    { time:'19:00', cls:'c-free',  icon:'🧘', title:'زمان آزاد کامل', desc:'خانواده، دوستان، سرگرمی', tag:null },
+    { time:'21:30', cls:'c-food',  icon:'🌙', title:'Quark', desc:'Quark + عسل + دارچین', tag:null },
+    { time:'22:00', cls:'c-sleep', icon:'🌙', title:'خواب', desc:'۷.۵ ساعت', tag:null },
+  ],
+};
+
+const habits = [
+  { icon:'🏋️', label:'ورزش / کاردیو' },
+  { icon:'💻', label:'کدنویسی وب‌اپ (۲ ساعت)' },
+  { icon:'💧', label:'۳ لیتر آب' },
+  { icon:'🥗', label:'تغذیه مطابق برنامه' },
+  { icon:'🌙', label:'خواب قبل ۲۲:۳۰' },
+  { icon:'🚶', label:'پیاده‌روی بعد ناهار' },
+  { icon:'📵', label:'بدون موبایل ۳۰ دق صبح' },
+  { icon:'🫙', label:'Quark قبل خواب' },
+];
+
+const habitState = {};
+const dayDoneState = {};
+let currentDay = 0;
+
+// Get current day of week (Mo=0)
+const jsDay = new Date().getDay();
+const todayIdx = jsDay === 0 ? 6 : jsDay - 1;
+
+function getType(day) {
+  return day.type === 'rest' || day.type === 'rest-active' ? 'rest' : day.type;
+}
+
+function renderDayStrip() {
+  const strip = document.getElementById('dayStrip');
+  strip.innerHTML = '';
+  days.forEach((d, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'day-btn' + (i === currentDay ? ' active' : '');
+    const isToday = i === todayIdx;
+    btn.innerHTML = `<span style="color:${isToday?'#facc15':'inherit'}">${d.de}</span> <span style="opacity:0.6;font-size:0.65rem">${d.fa}</span>`;
+    btn.onclick = () => { currentDay = i; render(); };
+    strip.appendChild(btn);
+  });
+}
+
+function renderStats(day) {
+  const type = getType(day);
+  const isRest = type === 'rest';
+  const workHours = isRest ? 0 : 8;
+  const codeHours = isRest ? 0 : 2;
+  const gymMin = isRest ? 0 : (day.type === 'cardio' ? 30 : 50);
+  const sleepH = 7.5;
+  return `<div class="stats-row">
+    <div class="stat-card"><div class="stat-val s-work">${workHours}h</div><div class="stat-lbl">کار شرکت</div></div>
+    <div class="stat-card"><div class="stat-val s-code">${codeHours}h</div><div class="stat-lbl">وب‌اپ</div></div>
+    <div class="stat-card"><div class="stat-val s-gym">${gymMin}m</div><div class="stat-lbl">ورزش</div></div>
+    <div class="stat-card"><div class="stat-val s-sleep">${sleepH}h</div><div class="stat-lbl">خواب</div></div>
+  </div>`;
+}
+
+function renderTimeline(day) {
+  const type = getType(day);
+  const blocks = timeline[type] || timeline.rest;
+  let html = `<div class="timeline-wrap"><div class="section-label">⏱ برنامه ساعتی</div><div class="timeline">`;
+  blocks.forEach(b => {
+    html += `<div class="tblock">
+      <div class="time-col">
+        <div class="time-txt">${b.time}</div>
+        <div class="time-line"></div>
+      </div>
+      <div class="tblock-content ${b.cls}">
+        <span class="tblock-icon">${b.icon}</span>
+        <div class="tblock-title">${b.title}</div>
+        <div class="tblock-desc">${b.desc}</div>
+        ${b.tag ? `<div class="tblock-tag">${b.tag}</div>` : ''}
+      </div>
+    </div>`;
+  });
+  html += `</div></div>`;
+  return html;
+}
+
+function renderMealsCard(day) {
+  const type = getType(day);
+  const ms = meals[type] || meals.rest;
+  const total = ms.reduce((s, m) => s + parseInt(m.kcal), 0);
+  let html = `<div class="info-card"><h3>🍽 وعده‌های غذایی</h3>`;
+  ms.forEach(m => {
+    html += `<div class="meal-line">
+      <span class="meal-time-sm">${m.time}</span>
+      <span style="font-size:0.75rem">${m.icon}</span>
+      <span class="meal-name-sm">${m.name}</span>
+      <span class="meal-kcal">${m.kcal}</span>
+    </div>`;
+  });
+  html += `<div style="display:flex;justify-content:space-between;font-size:0.68rem;margin-top:8px;padding-top:6px;border-top:1px solid #1e2535">
+    <span style="color:#475569">جمع کالری</span>
+    <span style="color:#34d399;font-weight:700">${total} kcal</span>
+  </div></div>`;
+  return html;
+}
+
+function renderGymCard(day) {
+  if (day.type === 'rest' || day.type === 'rest-active') {
+    return `<div class="info-card" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:120px">
+      <div style="font-size:1.5rem;margin-bottom:6px">😴</div>
+      <div style="font-size:0.8rem;color:#a78bfa;font-weight:600">روز استراحت</div>
+      <div style="font-size:0.68rem;color:#475569;margin-top:4px;line-height:1.5">عضله در استراحت می‌سازه.<br>پیاده‌روی سبک کافیه.</div>
+    </div>`;
+  }
+  let html = `<div class="info-card"><h3 style="color:${day.gymColor}">🏋️ ${day.gym}</h3>`;
+  day.exercises.forEach((ex, i) => {
+    html += `<div class="workout-line">
+      <span class="ex-num">${i+1}</span>
+      <span class="ex-name">${ex.name}</span>
+      <span class="ex-sets">${ex.sets}</span>
+    </div>`;
+  });
+  html += `</div>`;
+  return html;
+}
+
+function renderHabits(dayIdx) {
+  let html = `<div class="habits-card"><h3>✅ چک‌لیست امروز</h3>`;
+  habits.forEach((h, hi) => {
+    const key = `${dayIdx}-${hi}`;
+    const done = habitState[key];
+    html += `<div class="habit-row">
+      <div class="habit-check ${done ? 'done' : ''}" onclick="toggleHabit(${dayIdx},${hi})">${done ? '✓' : ''}</div>
+      <span class="habit-icon">${h.icon}</span>
+      <span class="habit-label" style="${done ? 'text-decoration:line-through;color:#475569' : ''}">${h.label}</span>
+    </div>`;
+  });
+  const doneCount = habits.filter((_, hi) => habitState[`${dayIdx}-${hi}`]).length;
+  const pct = Math.round(doneCount / habits.length * 100);
+  html += `<div style="margin-top:10px;padding-top:8px;border-top:1px solid #1e2535">
+    <div style="display:flex;justify-content:space-between;font-size:0.68rem;margin-bottom:4px">
+      <span style="color:#475569">پیشرفت امروز</span>
+      <span style="color:#34d399">${doneCount}/${habits.length}</span>
+    </div>
+    <div class="prog-bar"><div class="prog-fill" style="width:${pct}%;background:#34d399"></div></div>
+  </div></div>`;
+  return html;
+}
+
+function renderWeekProgress() {
+  const dayTypeLabels = ['💪','💪','🏃','💪','🏃','😴','🚶'];
+  const dayLabels = ['Mo','Di','Mi','Do','Fr','Sa','So'];
+  const typeClass = ['train-day','train-day','cardio-day','train-day','cardio-day','rest-day2','rest-day2'];
+  let html = `<div class="week-card"><h3>📅 هفته جاری</h3><div class="week-row-cal">`;
+  dayLabels.forEach((dl, i) => {
+    const isToday = i === todayIdx;
+    const isDone = dayDoneState[i];
+    let cls = typeClass[i];
+    if (isDone) cls = 'done-day';
+    if (isToday && !isDone) cls += ' today';
+    html += `<div class="week-day-cal">
+      <div class="wdc-label">${dl}</div>
+      <div class="wdc-dot ${cls}" onclick="toggleDayDone(${i})">${isDone ? '✓' : dayTypeLabels[i]}</div>
+      <div class="wdc-type">${days[i].type === 'rest' ? 'رست' : days[i].type === 'rest-active' ? 'فعال' : days[i].type === 'cardio' ? 'کاردیو' : 'تمرین'}</div>
+    </div>`;
+  });
+  html += `</div>`;
+  const doneDays = Object.values(dayDoneState).filter(Boolean).length;
+  html += `<div style="display:flex;justify-content:space-between;font-size:0.68rem;margin-top:10px;padding-top:8px;border-top:1px solid #1e2535">
+    <span style="color:#475569">روزهای انجام‌شده</span>
+    <span style="color:#34d399;font-weight:700">${doneDays}/7</span>
+  </div></div>`;
+  return html;
+}
+
+function renderWebappCard(day) {
+  const type = getType(day);
+  const isRest = day.type === 'rest';
+  if (isRest) {
+    return `<div class="info-card" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:80px">
+      <div style="font-size:0.8rem;color:#64748b">امروز کدنویسی نداری</div>
+      <div style="font-size:0.68rem;color:#475569;margin-top:4px">برنامه فردا رو بنویس</div>
+    </div>`;
+  }
+  return `<div class="info-card">
+    <h3 style="color:#34d399">💻 وب‌اپ — ۱۶:۳۰ تا ۱۸:۳۰</h3>
+    <div class="meal-line"><span class="meal-time-sm">16:00</span><span class="meal-name-sm">بافر ذهنی — قهوه، هوا</span></div>
+    <div class="meal-line"><span class="meal-time-sm">16:30</span><span class="meal-name-sm">شروع کد — تسک مشخص</span></div>
+    <div class="meal-line"><span class="meal-time-sm">17:50</span><span class="meal-name-sm">تست + مستندات</span></div>
+    <div class="meal-line"><span class="meal-time-sm">18:25</span><span class="meal-name-sm">Commit + تسک فردا</span></div>
+    <div class="note-box" style="margin-top:8px;font-size:0.68rem;padding:7px 10px">
+      <strong>قانون:</strong> هر روز فقط یه چیز مشخص بساز — نه "بهتر کردن پروژه"
+    </div>
+  </div>`;
+}
+
+function render() {
+  renderDayStrip();
+  const day = days[currentDay];
+  const main = document.getElementById('mainContent');
+  main.innerHTML = renderStats(day)
+    + renderTimeline(day)
+    + `<div class="cards-row">${renderMealsCard(day)}${renderGymCard(day)}</div>`
+    + `<div class="cards-row">${renderWebappCard(day)}${renderWeekProgress()}</div>`
+    + renderHabits(currentDay);
+}
+
+function toggleHabit(dayIdx, hi) {
+  const key = `${dayIdx}-${hi}`;
+  habitState[key] = !habitState[key];
+  render();
+}
+
+function toggleDayDone(i) {
+  dayDoneState[i] = !dayDoneState[i];
+  render();
+}
+
+currentDay = todayIdx;
+render();
+</script>
+</body>
+</html>

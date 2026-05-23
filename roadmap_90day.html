@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Routine Hub — نقشه راه ۹۰ روزه</title>
+<style>
+  :root {
+    --bg: #080b12;
+    --surface: #0f1420;
+    --surface2: #161d2e;
+    --border: #1e2a40;
+    --accent: #3b82f6;
+    --accent2: #6366f1;
+    --green: #10b981;
+    --yellow: #f59e0b;
+    --red: #ef4444;
+    --purple: #8b5cf6;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --month1: #1e3a5f;
+    --month2: #1e3a2f;
+    --month3: #3a1e3a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    min-height: 100vh;
+    padding: 24px 20px 60px;
+  }
+
+  /* ── Header ── */
+  .header {
+    text-align: center;
+    margin-bottom: 36px;
+  }
+  .header h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 6px;
+  }
+  .header p { color: var(--muted); font-size: 0.9rem; }
+  .today-badge {
+    display: inline-block;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-top: 8px;
+  }
+
+  /* ── Overall progress ── */
+  .overall-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px 24px;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .overall-left { flex: 1; min-width: 160px; }
+  .overall-left h3 { font-size: 0.8rem; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: .06em; }
+  .overall-left .big-num { font-size: 2.8rem; font-weight: 800; color: var(--accent); line-height: 1; }
+  .overall-left .big-label { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+  .overall-bar-wrap { flex: 3; min-width: 200px; }
+  .overall-bar-wrap label { font-size: 0.78rem; color: var(--muted); display: flex; justify-content: space-between; margin-bottom: 6px; }
+  .bar-track { height: 12px; background: var(--border); border-radius: 99px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, #3b82f6, #8b5cf6); transition: width 0.6s ease; }
+  .stats-row { display: flex; gap: 16px; margin-top: 12px; flex-wrap: wrap; }
+  .stat-item { background: var(--surface2); border-radius: 10px; padding: 10px 16px; text-align: center; flex: 1; min-width: 90px; }
+  .stat-item .s-val { font-size: 1.4rem; font-weight: 700; }
+  .stat-item .s-lbl { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
+  .green { color: var(--green); }
+  .yellow { color: var(--yellow); }
+  .red { color: var(--red); }
+  .blue { color: var(--accent); }
+  .purple { color: var(--purple); }
+
+  /* ── Month tabs ── */
+  .tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+  .tab {
+    padding: 8px 20px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all .2s;
+    font-weight: 600;
+  }
+  .tab.active, .tab:hover { color: var(--text); border-color: var(--accent); background: #1a2540; }
+  .tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  /* ── Month panel ── */
+  .month-panel { display: none; }
+  .month-panel.active { display: block; }
+
+  .month-header {
+    border-radius: 14px;
+    padding: 18px 22px;
+    margin-bottom: 20px;
+    border: 1px solid var(--border);
+  }
+  .m1 .month-header { background: linear-gradient(135deg, #0d2137, #0d1a2e); border-color: #1e4080; }
+  .m2 .month-header { background: linear-gradient(135deg, #0a1f15, #0d1a12); border-color: #1a4030; }
+  .m3 .month-header { background: linear-gradient(135deg, #1a0d2e, #120d1a); border-color: #3a1e5f; }
+
+  .month-header h2 { font-size: 1.4rem; font-weight: 800; margin-bottom: 4px; }
+  .month-header .tagline { font-size: 0.85rem; color: var(--muted); }
+  .month-header .framework { font-size: 0.72rem; background: rgba(255,255,255,0.07); border-radius: 6px; padding: 2px 10px; display: inline-block; margin-top: 6px; }
+
+  /* ── Week cards ── */
+  .weeks-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+  @media (max-width: 600px) { .weeks-grid { grid-template-columns: 1fr; } }
+
+  .week-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    position: relative;
+    transition: border-color .2s;
+  }
+  .week-card:hover { border-color: var(--accent); }
+  .week-card .wk-label { font-size: 0.7rem; color: var(--muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: .05em; }
+  .week-card h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 10px; }
+
+  .milestone-list { list-style: none; }
+  .milestone-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 5px 0;
+    font-size: 0.82rem;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .milestone-list li:last-child { border-bottom: none; }
+  .milestone-list li .chk {
+    width: 18px;
+    height: 18px;
+    border-radius: 5px;
+    border: 2px solid var(--border);
+    flex-shrink: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    margin-top: 1px;
+    transition: all .15s;
+  }
+  .milestone-list li .chk.done { background: var(--green); border-color: var(--green); color: #fff; }
+  .milestone-list li .chk:hover { border-color: var(--green); }
+  .milestone-list li .txt { flex: 1; line-height: 1.4; }
+  .milestone-list li .txt.done-txt { text-decoration: line-through; color: var(--muted); }
+
+  /* Metric chip */
+  .metric-chip {
+    display: inline-block;
+    background: rgba(59,130,246,0.1);
+    border: 1px solid rgba(59,130,246,0.3);
+    color: var(--accent);
+    border-radius: 6px;
+    padding: 1px 7px;
+    font-size: 0.7rem;
+    margin-right: 4px;
+    white-space: nowrap;
+  }
+  .chip-green { background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.3); color: var(--green); }
+  .chip-yellow { background: rgba(245,158,11,0.1); border-color: rgba(245,158,11,0.3); color: var(--yellow); }
+  .chip-purple { background: rgba(139,92,246,0.1); border-color: rgba(139,92,246,0.3); color: var(--purple); }
+
+  /* ── North Star KPIs ── */
+  .kpi-section { margin-bottom: 20px; }
+  .kpi-section h3 { font-size: 0.78rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 10px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  @media (max-width: 500px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+  .kpi-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    text-align: center;
+  }
+  .kpi-card .kpi-icon { font-size: 1.4rem; margin-bottom: 4px; }
+  .kpi-card .kpi-target { font-size: 1.2rem; font-weight: 800; }
+  .kpi-card .kpi-lbl { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
+  .kpi-card .kpi-current { font-size: 0.75rem; color: var(--muted); margin-top: 6px; }
+  .kpi-card .kpi-current span { color: var(--text); font-weight: 600; }
+
+  /* ── Daily focus box ── */
+  .daily-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+  }
+  .daily-box h3 { font-size: 0.78rem; color: var(--muted); margin-bottom: 10px; text-transform: uppercase; letter-spacing: .05em; }
+  .daily-rhythm { display: flex; gap: 8px; flex-wrap: wrap; }
+  .rhythm-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 0.78rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    min-width: 80px;
+  }
+  .rhythm-block .time { font-size: 0.65rem; color: var(--accent); font-weight: 700; }
+  .rhythm-block .act { margin-top: 2px; }
+
+  /* ── Advisor insight ── */
+  .advisor-quote {
+    background: linear-gradient(135deg, rgba(99,102,241,0.08), rgba(59,130,246,0.06));
+    border: 1px solid rgba(99,102,241,0.2);
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    font-size: 0.82rem;
+    line-height: 1.6;
+  }
+  .advisor-quote .who { font-size: 0.7rem; color: var(--purple); font-weight: 700; margin-bottom: 6px; }
+
+  /* ── Danger/blocker ── */
+  .blocker-box {
+    background: rgba(239,68,68,0.06);
+    border: 1px solid rgba(239,68,68,0.2);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    font-size: 0.8rem;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .blocker-box .icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+
+  /* ── Footer note ── */
+  .footer-note {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.75rem;
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* ── Reset button ── */
+  .reset-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .reset-btn:hover { border-color: var(--red); color: var(--red); }
+
+  /* Progress bar per week */
+  .week-progress { margin-top: 10px; }
+  .week-progress label { font-size: 0.7rem; color: var(--muted); display: flex; justify-content: space-between; }
+  .week-bar { height: 4px; background: var(--border); border-radius: 99px; overflow: hidden; margin-top: 4px; }
+  .week-bar-fill { height: 100%; border-radius: 99px; background: var(--green); transition: width .4s; }
+
+  .month-progress-row { display: flex; align-items: center; gap: 12px; margin-top: 8px; flex-wrap: wrap; }
+  .month-pct { font-size: 1.6rem; font-weight: 800; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🗺️ نقشه راه ۹۰ روزه</h1>
+  <p>Routine Hub · از ایده تا اولین ۱۰۰ کاربر پولی</p>
+  <div class="today-badge" id="todayBadge">📅 امروز: ...</div>
+</div>
+
+<!-- Overall Progress -->
+<div class="overall-card">
+  <div class="overall-left">
+    <h3>پیشرفت کل</h3>
+    <div class="big-num" id="totalPct">0%</div>
+    <div class="big-label" id="daysLeft">روز ۱ از ۹۰</div>
+  </div>
+  <div class="overall-bar-wrap">
+    <label>
+      <span>روز شروع</span>
+      <span id="overallFrac">0 / 0 task</span>
+    </label>
+    <div class="bar-track"><div class="bar-fill" id="overallBar" style="width:0%"></div></div>
+    <div class="stats-row">
+      <div class="stat-item"><div class="s-val green" id="doneCount">0</div><div class="s-lbl">✅ انجام شد</div></div>
+      <div class="stat-item"><div class="s-val yellow" id="pendCount">0</div><div class="s-lbl">⏳ در صف</div></div>
+      <div class="stat-item"><div class="s-val blue" id="totalCount">0</div><div class="s-lbl">📌 کل tasks</div></div>
+      <div class="stat-item" style="margin-right:auto;">
+        <button class="reset-btn" onclick="resetAll()">🔄 ریست</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Tabs -->
+<div class="tabs">
+  <div class="tab active" onclick="switchTab(1)">ماه ۱ · Ship</div>
+  <div class="tab" onclick="switchTab(2)">ماه ۲ · Grow</div>
+  <div class="tab" onclick="switchTab(3)">ماه ۳ · Scale</div>
+</div>
+
+<!-- ═══════════════ MONTH 1 ═══════════════ -->
+<div class="month-panel m1 active" id="panel-1">
+
+  <div class="month-header">
+    <h2>🚀 ماه اول — Ship Fast, Charge Early</h2>
+    <div class="tagline">هدف: اولین ۱۰ کاربر پولی. هیچ چیز دیگری مهم نیست.</div>
+    <span class="framework">📐 Pieter Levels Framework: Ship → Tweet → Charge → Iterate</span>
+  </div>
+
+  <div class="advisor-quote">
+    <div class="who">🧔 Pieter Levels می‌گوید:</div>
+    "Don't wait until it's perfect. Ship the ugly version. Your first 10 users will teach you more than 6 months of planning. Set up Stripe on day one — even if the product is half-done. A paying user is a real user."
+  </div>
+
+  <div class="kpi-section">
+    <h3>🎯 North Star این ماه</h3>
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-icon">👤</div>
+        <div class="kpi-target blue">10</div>
+        <div class="kpi-lbl">کاربر پولی</div>
+        <div class="kpi-current">الان: <span>0</span></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">💶</div>
+        <div class="kpi-target green">€50</div>
+        <div class="kpi-lbl">MRR اول</div>
+        <div class="kpi-current">هدف: €5/ماه</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">📱</div>
+        <div class="kpi-target purple">1</div>
+        <div class="kpi-lbl">PWA آماده</div>
+        <div class="kpi-current">installable</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="weeks-grid">
+    <!-- Week 1 -->
+    <div class="week-card">
+      <div class="wk-label">هفته ۱</div>
+      <h4>⚙️ Foundation & Polish</h4>
+      <ul class="milestone-list" id="m1w1">
+        <li><span class="chk" onclick="toggleCheck(this)"></span><span class="txt">اضافه کردن localStorage — روتین‌ها save بمانند <span class="metric-chip">بحرانی</span></span></li>
+        <li><span class="chk" onclick="toggleCheck(this)"></span><span class="txt">PWA manifest + service worker — installable روی موبایل <span class="metric-chip">بحرانی</span></span></li>
+        <li><span class="chk" onclick="toggleCheck(this)"></span><span class="txt">تست کامل روی iOS Safari و Android Chrome</span></li>
+        <li><span class="chk" onclick="toggleCheck(this)"></span><span class="txt">لندینگ پیج ساده یک صفحه‌ای (HTML) — توضیح اپ</span></li>
+        <li><span class="chk" onclick="toggleCheck(this)"></span><span class="txt">ساختن حساب Stripe و تست payment flow</span></li>
+      </ul>
+      <div class="week-progress">
+        <label><span>پیشرفت هفته</span><span class="week-pct">0%</span></label>
+        <div class="week-bar"><div class="week-bar-fill" style="width:0%"></div></div>
+      </div>
+    </div>
+    <!-- Week 2 -->
+    <div class="week-card">
+      <div class="wk-label">هفته ۲</div>
+      <h4>📣 First Launch</h4>
+      <ul class="milestone-list" id="m1w2">
+        <li><span class="chk" onclick="toggleCheck(this)"></span><span class="txt">پست اول توییتر/X به فارسی — نمایش ساخته شد <span class="metric-chip chip-green">عمومی</span></span></li>
+        <li><span class="chk" onclick="toggleCheck(this)"></span><span class="txt">شیر کردن در گروه‌های Persian diaspora (تلگرام، اینستا)</span></li>
+        <li><span class="chk" onclick="toggleCheck(this)"></span><span class="txt">جمع‌آوری ۲۰ ایمیل waitlist از طریق فرم ساده</span></li>
+        <li><span class="chk" onclick="toggleCheck(this)"></span><span class="txt">گفتگو با ۵ نفر از waitlist — ۳۰ دقیقه هر کدام</span></li>
+        <li><span class="chk" onclick="toggleCheck(this)"></span><span class="txt">Product Hunt ایرانی (IranStartups / LinkedIn) announce</span></li>
+      </ul>
+      <div class="week-progress">
+        <label><span>پیشرفت هفته</span><span class="week-pct">0%</span></label>
+        <div class="week-bar"><div class="week-bar-fill" style="width:0%"></div></div>
+      </div>
+    </div>
+    <!-- Week 3 -->
+    <div class="week-card">
+      <div class="wk-label">هفته ۳</div>
+      <h4>💳 First Payment</h4>
+      <ul class="milestone-list" id="m1w3">
+        <li><span class="chk" onclick="toggleCheck(this)"></span><span class="txt">فعال کردن paywall — بعد از ۷ روز free trial <span class="metric-chip">بحرانی</span></span></li>
+        <li><span class="chk" onclick="toggleCheck(this)"></span><span class="txt">قیمت‌گذاری: €5/ماه یا €40/سال</span></li>
+        <li><span class="chk" onclick="toggleCheck(this)"></span><span class="txt">اولین ۳ کاربر پولی <span class="metric-chip chip-green">Milestone!</span></span></li>
+        <li><span class="chk" onclick="toggleCheck(this)"></span><span class="txt">جمع‌آوری feedback مکتوب از کاربران پولی</span></li>
+        <li><span class="chk" onclick="toggleCheck(this)"></span><span class="txt">رفع ۳ بزرگترین bug که کاربران گزارش دادند</span></li>
+      </ul>
+      <div class="week-progress">
+        <label><span>پیشرفت هفته</span><span class="week-pct">0%</span></label>
+        <div class="week-bar"><div class="week-bar-fill" style="width:0%"></div></div>
+      </div>
+    </div>
+    <!-- Week 4 -->
+    <div class="week-card">
+      <div class="wk-label">هفته ۴</div>
+      <h4>📊 Learn & Double</h4>
+      <ul class="milestone-list" id="m1w4">
+        <li><span class="chk" onclick="toggleCheck(this)"></span><span class="txt">تحلیل: چه feature‌ای بیشترین استفاده شد؟</span></li>
+        <li><span class="chk" onclick="toggleCheck(this)"></span><span class="txt">رسیدن به ۱۰ کاربر پولی <span class="metric-chip chip-green">North Star!</span></span></li>
+        <li><span class="chk" onclick="toggleCheck(this)"></span><span class="txt">ارسال ایمیل "ممنون" شخصی به همه کاربران پولی</span></li>
+        <li><span class="chk" onclick="toggleCheck(this)"></span><span class="txt">تعیین ۳ feature برای ماه دوم بر اساس feedback</span></li>
+        <li><span class="chk" onclick="toggleCheck(this)"></span><span class="txt">نوشتن retrospective — چه یاد گرفتیم؟</span></li>
+      </ul>
+      <div class="week-progress">
+        <label><span>پیشرفت هفته</span><span class="week-pct">0%</span></label>
+        <div class="week-bar"><div class="week-bar-fill" style="width:0%"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="blocker-box">
+    <div class="icon">⚠️</div>
+    <div>
+      <strong>بزرگترین ریسک ماه اول:</strong> ساختن feature به جای پیدا کردن کاربر. اگر روزی بیشتر از ۲ ساعت کد زدی و کمتر از ۳۰ دقیقه با کاربر حرف زدی — مسیرت اشتباه است.
+    </div>
+  </div>
+
+  <div class="daily-box">
+    <h3>🕐 ریتم روزانه ماه اول</h3>
+    <div class="daily-rhythm">
+      <div class="rhythm-block"><div class="time">06:00</div><div class="act">🏋️ باشگاه</div></div>
+      <div class="rhythm-block"><div class="time">08–16</div><div class="act">💼 کار اصلی</div></div>
+      <div class="rhythm-block"><div class="time">16:30</div><div class="act">💬 ۱ گفتگو با کاربر</div></div>
+      <div class="rhythm-block"><div class="time">17:00</div><div class="act">💻 ۹۰ دقیقه کد</div></div>
+      <div class="rhythm-block"><div class="time">18:30</div><div class="act">📱 ۳۰ دقیقه social</div></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════ MONTH 2 ═══════════════ -->
+<div class="month-panel m2" id="panel-2">
+
+  <div class="month-header">
+    <h2>📈 ماه دوم — Retain & Grow</h2>
+    <div class="tagline">هدف: ۵۰ کاربر پولی. کاربری که ماند مهم‌تر از کاربری که آمد.</div>
+    <span class="framework">📐 Lenny Rachitsky: Retention → Referral → Revenue</span>
+  </div>
+
+  <div class="advisor-quote">
+    <div class="who">📊 Lenny Rachitsky می‌گوید:</div>
+    "The single most important metric at your stage is Day-7 retention. If people come back after one week, you have something real. If they don't, no amount of growth hacking will save you. Fix retention before you pour fuel on distribution."
+  </div>
+
+  <div class="kpi-section">
+    <h3>🎯 North Star این ماه</h3>
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-icon">👥</div>
+        <div class="kpi-target blue">50</div>
+        <div class="kpi-lbl">کاربر پولی</div>
+        <div class="kpi-current">از ماه ۱: <span>10</span></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">🔄</div>
+        <div class="kpi-target green">40%</div>
+        <div class="kpi-lbl">Day-7 Retention</div>
+        <div class="kpi-current">benchmark SaaS: 25%</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">💶</div>
+        <div class="kpi-target purple">€250</div>
+        <div class="kpi-lbl">MRR</div>
+        <div class="kpi-current">€5 × 50 کاربر</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="weeks-grid">
+    <div class="week-card">
+      <div class="wk-label">هفته ۵</div>
+      <h4>🔄 Retention Engine</h4>
+      <ul class="milestone-list" id="m2w1">
+        <li><span class="chk" onclick="toggleCheck(this)"></span><span class="txt">اضافه کردن push notification روزانه (PWA) <span class="metric-chip">retention</span></span></li>
+        <li><span class="chk" onclick="toggleCheck(this)"></span><span class="txt">Streak counter — نمایش روزهای متوالی باشگاه</span></li>
+        <li><span class="chk" onclick="toggleCheck(this)"></span><span class="txt">Weekly summary ایمیل — پیشرفت هفته</span></li>
+        <li><span class="chk" onclick="toggleCheck(this)"></span><span class="txt">اندازه‌گیری چرخه بازگشت کاربران فعلی</span></li>
+      </ul>
+      <div class="week-progress">
+        <label><span>پیشرفت هفته</span><span class="week-pct">0%</span></label>
+        <div class="week-bar"><div class="week-bar-fill" style="width:0%"></div></div>
+      </div>
+    </div>
+    <div class="week-card">
+      <div class="wk-label">هفته ۶</div>
+      <h4>📣 Distribution</h4>
+      <ul class="milestone-list" id="m2w2">
+        <li><span class="chk" onclick="toggleCheck(this)"></span><span class="txt">پست در Reddit: r/IranianDiaspora, r/fitness <span class="metric-chip chip-green">انگلیسی</span></span></li>
+        <li><span class="chk" onclick="toggleCheck(this)"></span><span class="txt">یوتیوب شورت فارسی — ۶۰ ثانیه نمایش اپ</span></li>
+        <li><span class="chk" onclick="toggleCheck(this)"></span><span class="txt">ارتباط با ۳ influencer فارسی‌زبان حوزه سلامت</span></li>
+        <li><span class="chk" onclick="toggleCheck(this)"></span><span class="txt">Referral: کاربر فعلی → ۱ ماه رایگان در ازای دعوت</span></li>
+      </ul>
+      <div class="week-progress">
+        <label><span>پیشرفت هفته</span><span class="week-pct">0%</span></label>
+        <div class="week-bar"><div class="week-bar-fill" style="width:0%"></div></div>
+      </div>
+    </div>
+    <div class="week-card">
+      <div class="wk-label">هفته ۷</div>
+      <h4>✨ Feature Bets</h4>
+      <ul class="milestone-list" id="m2w3">
+        <li><span class="chk" onclick="toggleCheck(this)"></span><span class="txt">Progress photos tracking (بر اساس feedback ماه ۱)</span></li>
+        <li><span class="chk" onclick="toggleCheck(this)"></span><span class="txt">کالری و وزن ورودی دستی + نمودار هفتگی</span></li>
+        <li><span class="chk" onclick="toggleCheck(this)"></span><span class="txt">Share card — تصویر آماده برای اینستاگرام از روتین</span></li>
+        <li><span class="chk" onclick="toggleCheck(this)"></span><span class="txt">A/B test: قیمت €5 در مقابل €8</span></li>
+      </ul>
+      <div class="week-progress">
+        <label><span>پیشرفت هفته</span><span class="week-pct">0%</span></label>
+        <div class="week-bar"><div class="week-bar-fill" style="width:0%"></div></div>
+      </div>
+    </div>
+    <div class="week-card">
+      <div class="wk-label">هفته ۸</div>
+      <h4>🤝 Community</h4>
+      <ul class="milestone-list" id="m2w4">
+        <li><span class="chk" onclick="toggleCheck(this)"></span><span class="txt">تلگرام channel اپ — محتوای روتین روزانه <span class="metric-chip chip-purple">community</span></span></li>
+        <li><span class="chk" onclick="toggleCheck(this)"></span><span class="txt">رسیدن به ۵۰ کاربر پولی <span class="metric-chip chip-green">North Star!</span></span></li>
+        <li><span class="chk" onclick="toggleCheck(this)"></span><span class="txt">€250 MRR اولین بار در تاریخ</span></li>
+        <li><span class="chk" onclick="toggleCheck(this)"></span><span class="txt">جمع‌آوری ۵ testimonial مکتوب برای لندینگ پیج</span></li>
+      </ul>
+      <div class="week-progress">
+        <label><span>پیشرفت هفته</span><span class="week-pct">0%</span></label>
+        <div class="week-bar"><div class="week-bar-fill" style="width:0%"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="blocker-box">
+    <div class="icon">⚠️</div>
+    <div>
+      <strong>بزرگترین ریسک ماه دوم:</strong> ساختن feature جدید قبل از fix کردن retention. اگر کاربران بعد از ۷ روز برنگردند، feature جدید فقط leak را بزرگتر می‌کند.
+    </div>
+  </div>
+
+  <div class="daily-box">
+    <h3>🕐 ریتم روزانه ماه دوم</h3>
+    <div class="daily-rhythm">
+      <div class="rhythm-block"><div class="time">06:00</div><div class="act">🏋️ باشگاه</div></div>
+      <div class="rhythm-block"><div class="time">08–16</div><div class="act">💼 کار اصلی</div></div>
+      <div class="rhythm-block"><div class="time">16:30</div><div class="act">📊 metrics بررسی</div></div>
+      <div class="rhythm-block"><div class="time">17:00</div><div class="act">💻 ۶۰ دقیقه کد</div></div>
+      <div class="rhythm-block"><div class="time">18:00</div><div class="act">📝 ۳۰ دقیقه content</div></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════ MONTH 3 ═══════════════ -->
+<div class="month-panel m3" id="panel-3">
+
+  <div class="month-header">
+    <h2>🌍 ماه سوم — Scale & Pitch</h2>
+    <div class="tagline">هدف: ۱۰۰ کاربر پولی + آماده‌سازی برای سرمایه‌گذار.</div>
+    <span class="framework">📐 Omid Kordestani: Distribution Map → Warm Intro → Credibility Signal</span>
+  </div>
+
+  <div class="advisor-quote">
+    <div class="who">🌐 Omid Kordestani می‌گوید:</div>
+    "Numbers tell the story investors can't ignore. Walk into any room with 100 paying users, €500 MRR, and 40% retention — and you're not asking for money, you're choosing who to partner with. Build the proof first."
+  </div>
+
+  <div class="kpi-section">
+    <h3>🎯 North Star این ماه</h3>
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-icon">💯</div>
+        <div class="kpi-target blue">100</div>
+        <div class="kpi-lbl">کاربر پولی</div>
+        <div class="kpi-current">از ماه ۲: <span>50</span></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">💶</div>
+        <div class="kpi-target green">€500</div>
+        <div class="kpi-lbl">MRR</div>
+        <div class="kpi-current">Ramen profitable</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">🤝</div>
+        <div class="kpi-target purple">3</div>
+        <div class="kpi-lbl">Investor Calls</div>
+        <div class="kpi-current">warm intro</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="weeks-grid">
+    <div class="week-card">
+      <div class="wk-label">هفته ۹</div>
+      <h4>🚀 Growth Channels</h4>
+      <ul class="milestone-list" id="m3w1">
+        <li><span class="chk" onclick="toggleCheck(this)"></span><span class="txt">Product Hunt launch — English <span class="metric-chip chip-green">بین‌المللی</span></span></li>
+        <li><span class="chk" onclick="toggleCheck(this)"></span><span class="txt">مقاله Medium انگلیسی: "Building a Persian fitness app"</span></li>
+        <li><span class="chk" onclick="toggleCheck(this)"></span><span class="txt">پادکست‌های فارسی tech — ۲ مصاحبه</span></li>
+        <li><span class="chk" onclick="toggleCheck(this)"></span><span class="txt">SEO: ۵ پست فارسی keyword-rich (روتین، باشگاه)</span></li>
+      </ul>
+      <div class="week-progress">
+        <label><span>پیشرفت هفته</span><span class="week-pct">0%</span></label>
+        <div class="week-bar"><div class="week-bar-fill" style="width:0%"></div></div>
+      </div>
+    </div>
+    <div class="week-card">
+      <div class="wk-label">هفته ۱۰</div>
+      <h4>💼 Investor Prep</h4>
+      <ul class="milestone-list" id="m3w2">
+        <li><span class="chk" onclick="toggleCheck(this)"></span><span class="txt">One-pager انگلیسی: Problem → Solution → Traction <span class="metric-chip">سند</span></span></li>
+        <li><span class="chk" onclick="toggleCheck(this)"></span><span class="txt">نقشه سرمایه‌گذاران: High Alpha, Cherry Ventures, Point Nine</span></li>
+        <li><span class="chk" onclick="toggleCheck(this)"></span><span class="txt">یافتن ۵ Iranian-European founder برای warm intro</span></li>
+        <li><span class="chk" onclick="toggleCheck(this)"></span><span class="txt">Pitch deck ۱۰ اسلاید (Sequoia template)</span></li>
+      </ul>
+      <div class="week-progress">
+        <label><span>پیشرفت هفته</span><span class="week-pct">0%</span></label>
+        <div class="week-bar"><div class="week-bar-fill" style="width:0%"></div></div>
+      </div>
+    </div>
+    <div class="week-card">
+      <div class="wk-label">هفته ۱۱</div>
+      <h4>🎯 Push to 100</h4>
+      <ul class="milestone-list" id="m3w3">
+        <li><span class="chk" onclick="toggleCheck(this)"></span><span class="txt">رسیدن به ۱۰۰ کاربر پولی <span class="metric-chip chip-green">North Star!</span></span></li>
+        <li><span class="chk" onclick="toggleCheck(this)"></span><span class="txt">€500 MRR — Ramen Profitable <span class="metric-chip chip-green">Milestone!</span></span></li>
+        <li><span class="chk" onclick="toggleCheck(this)"></span><span class="txt">ارسال cold email به ۱۰ سرمایه‌گذار با traction numbers</span></li>
+        <li><span class="chk" onclick="toggleCheck(this)"></span><span class="txt">اولین warm intro call (هدف ۳ جلسه)</span></li>
+      </ul>
+      <div class="week-progress">
+        <label><span>پیشرفت هفته</span><span class="week-pct">0%</span></label>
+        <div class="week-bar"><div class="week-bar-fill" style="width:0%"></div></div>
+      </div>
+    </div>
+    <div class="week-card">
+      <div class="wk-label">هفته ۱۲</div>
+      <h4>🔮 Beyond 90 Days</h4>
+      <ul class="milestone-list" id="m3w4">
+        <li><span class="chk" onclick="toggleCheck(this)"></span><span class="txt">تصمیم: bootstrap ادامه یا raise سرمایه؟</span></li>
+        <li><span class="chk" onclick="toggleCheck(this)"></span><span class="txt">برنامه ۹۰ روز بعدی بر اساس داده واقعی</span></li>
+        <li><span class="chk" onclick="toggleCheck(this)"></span><span class="txt">نوشتن "Build in Public" thread — داستان ۳ ماه</span></li>
+        <li><span class="chk" onclick="toggleCheck(this)"></span><span class="txt">جشن گرفتن! — تو کاری کردی که ۹۹٪ نمی‌کنند 🎉</span></li>
+      </ul>
+      <div class="week-progress">
+        <label><span>پیشرفت هفته</span><span class="week-pct">0%</span></label>
+        <div class="week-bar"><div class="week-bar-fill" style="width:0%"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="advisor-quote" style="margin-top:0;">
+    <div class="who">💡 چرا €500 MRR مهم است؟</div>
+    با €500 MRR و ۱۰۰ کاربر پولی، سرمایه‌گذار می‌بیند: (۱) بازار وجود دارد، (۲) مردم پول می‌دهند، (۳) تو توانستی بسازی. این سه چیز برای pre-seed کافی است.
+  </div>
+
+  <div class="daily-box">
+    <h3>🕐 ریتم روزانه ماه سوم</h3>
+    <div class="daily-rhythm">
+      <div class="rhythm-block"><div class="time">06:00</div><div class="act">🏋️ باشگاه</div></div>
+      <div class="rhythm-block"><div class="time">08–16</div><div class="act">💼 کار اصلی</div></div>
+      <div class="rhythm-block"><div class="time">16:30</div><div class="act">📧 ایمیل investor</div></div>
+      <div class="rhythm-block"><div class="time">17:15</div><div class="act">💻 ۴۵ دقیقه کد</div></div>
+      <div class="rhythm-block"><div class="time">18:00</div><div class="act">📱 growth channel</div></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer-note">
+  ساخته شده با ❤️ برای Routine Hub · فریم‌ورک: Lenny Rachitsky × Pieter Levels<br>
+  پیشرفت‌ها در مرورگر ذخیره می‌شوند — می‌توانی هر روز برگردی
+</div>
+
+<script>
+// ── State ──
+const STORE_KEY = 'roadmap90_v1';
+
+function loadState() {
+  try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch { return {}; }
+}
+function saveState(s) { localStorage.setItem(STORE_KEY, JSON.stringify(s)); }
+
+// ── Init date ──
+function initDate() {
+  const now = new Date();
+  const opts = { weekday:'long', year:'numeric', month:'long', day:'numeric' };
+  document.getElementById('todayBadge').textContent = '📅 امروز: ' + now.toLocaleDateString('fa-IR', opts);
+}
+
+// ── Tab switching ──
+function switchTab(n) {
+  document.querySelectorAll('.month-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + n).classList.add('active');
+  document.querySelectorAll('.tab')[n-1].classList.add('active');
+}
+
+// ── Checkbox logic ──
+function toggleCheck(el) {
+  const isDone = el.classList.toggle('done');
+  el.textContent = isDone ? '✓' : '';
+  const txt = el.nextElementSibling;
+  if (txt) txt.classList.toggle('done-txt', isDone);
+  persistAll();
+  updateAll();
+}
+
+function getCheckId(chk) {
+  const li = chk.closest('li');
+  const ul = chk.closest('ul');
+  const liIdx = Array.from(ul.children).indexOf(li);
+  return ul.id + '_' + liIdx;
+}
+
+function persistAll() {
+  const state = {};
+  document.querySelectorAll('.milestone-list .chk').forEach(chk => {
+    state[getCheckId(chk)] = chk.classList.contains('done');
+  });
+  saveState(state);
+}
+
+function restoreAll() {
+  const state = loadState();
+  document.querySelectorAll('.milestone-list .chk').forEach(chk => {
+    const id = getCheckId(chk);
+    if (state[id]) {
+      chk.classList.add('done');
+      chk.textContent = '✓';
+      const txt = chk.nextElementSibling;
+      if (txt) txt.classList.add('done-txt');
+    }
+  });
+}
+
+function resetAll() {
+  if (!confirm('ریست کردن همه چک‌لیست‌ها؟')) return;
+  saveState({});
+  document.querySelectorAll('.milestone-list .chk').forEach(chk => {
+    chk.classList.remove('done');
+    chk.textContent = '';
+    const txt = chk.nextElementSibling;
+    if (txt) txt.classList.remove('done-txt');
+  });
+  updateAll();
+}
+
+// ── Progress calculations ──
+function updateAll() {
+  let totalDone = 0, totalAll = 0;
+
+  document.querySelectorAll('.week-card').forEach(card => {
+    const chks = card.querySelectorAll('.chk');
+    const done = card.querySelectorAll('.chk.done').length;
+    const all = chks.length;
+    const pct = all ? Math.round(done / all * 100) : 0;
+
+    const pctEl = card.querySelector('.week-pct');
+    const barEl = card.querySelector('.week-bar-fill');
+    if (pctEl) pctEl.textContent = pct + '%';
+    if (barEl) barEl.style.width = pct + '%';
+
+    totalDone += done;
+    totalAll += all;
+  });
+
+  const overallPct = totalAll ? Math.round(totalDone / totalAll * 100) : 0;
+  document.getElementById('totalPct').textContent = overallPct + '%';
+  document.getElementById('overallBar').style.width = overallPct + '%';
+  document.getElementById('overallFrac').textContent = totalDone + ' / ' + totalAll + ' task';
+  document.getElementById('doneCount').textContent = totalDone;
+  document.getElementById('pendCount').textContent = totalAll - totalDone;
+  document.getElementById('totalCount').textContent = totalAll;
+
+  // Estimate day
+  const dayEst = Math.round(overallPct / 100 * 90);
+  document.getElementById('daysLeft').textContent = 'روز ' + Math.max(1, dayEst) + ' از ۹۰';
+}
+
+// ── Boot ──
+initDate();
+restoreAll();
+updateAll();
+</script>
+</body>
+</html>

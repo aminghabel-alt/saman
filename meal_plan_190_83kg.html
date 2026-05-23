@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #0f1117; color: #e2e8f0; padding: 20px; direction: rtl; }
+  h1 { text-align: center; font-size: 1.25rem; color: #34d399; margin-bottom: 4px; }
+  .subtitle { text-align: center; font-size: 0.76rem; color: #64748b; margin-bottom: 16px; }
+  .stats { display: flex; gap: 8px; justify-content: center; margin-bottom: 16px; flex-wrap: wrap; }
+  .stat { background: #1e2535; border-radius: 10px; padding: 8px 14px; text-align: center; }
+  .stat .v { font-size: 1rem; font-weight: 700; color: #34d399; }
+  .stat .l { font-size: 0.62rem; color: #64748b; }
+
+  .tabs { display: flex; gap: 6px; justify-content: center; margin-bottom: 16px; flex-wrap: wrap; }
+  .tab { padding: 6px 13px; border-radius: 20px; border: 1px solid #334155; background: transparent; color: #94a3b8; cursor: pointer; font-size: 0.78rem; transition: all 0.2s; }
+  .tab.active { background: #34d399; color: #0f1117; border-color: #34d399; font-weight: 700; }
+  .section { display: none; }
+  .section.active { display: block; }
+
+  .day-tabs { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+  .day-tab { padding: 5px 12px; border-radius: 16px; border: 1px solid #334155; background: transparent; color: #64748b; cursor: pointer; font-size: 0.75rem; transition: all 0.2s; }
+  .day-tab.active { background: #1e3a2f; color: #34d399; border-color: #34d399; }
+  .day-content { display: none; }
+  .day-content.active { display: block; }
+
+  .meals { display: flex; flex-direction: column; gap: 10px; }
+  .meal { background: #1e2535; border-radius: 12px; padding: 13px 15px; border-right: 3px solid transparent; }
+  .meal.pre    { border-color: #f97316; }
+  .meal.post   { border-color: #34d399; }
+  .meal.lunch  { border-color: #facc15; }
+  .meal.snack  { border-color: #a78bfa; }
+  .meal.dinner { border-color: #60a5fa; }
+  .meal.night  { border-color: #475569; }
+
+  .meal-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .meal-time { font-size: 0.68rem; color: #64748b; min-width: 48px; }
+  .meal-icon { font-size: 1rem; }
+  .meal-name { font-size: 0.88rem; font-weight: 600; flex: 1; }
+  .meal-cal { font-size: 0.7rem; background: #0f1117; border: 1px solid #334155; border-radius: 8px; padding: 2px 8px; color: #34d399; white-space: nowrap; }
+
+  .meal-items { display: flex; flex-direction: column; gap: 0; }
+  .meal-item { display: flex; justify-content: space-between; align-items: center; font-size: 0.77rem; padding: 4px 0; border-bottom: 1px solid #1a2030; }
+  .meal-item:last-child { border-bottom: none; }
+  .item-name { color: #cbd5e1; }
+  .item-macros { font-size: 0.67rem; color: #475569; white-space: nowrap; margin-right: 6px; }
+
+  .macros-bar { display: flex; gap: 6px; margin-top: 10px; padding-top: 8px; border-top: 1px solid #1a2030; }
+  .macro-pill { flex: 1; text-align: center; background: #0f1117; border-radius: 6px; padding: 5px 2px; }
+  .macro-pill .val { font-size: 0.82rem; font-weight: 700; }
+  .macro-pill .lbl { font-size: 0.58rem; color: #64748b; margin-top: 1px; }
+  .p-col { color: #34d399; }
+  .c-col { color: #facc15; }
+  .f-col { color: #f97316; }
+  .k-col { color: #a78bfa; }
+
+  .daily-total { background: #1a2a3a; border: 1px solid #2d4a6a; border-radius: 12px; padding: 12px 15px; margin-top: 14px; }
+  .daily-total h3 { font-size: 0.8rem; color: #60a5fa; margin-bottom: 10px; }
+  .total-row { display: flex; gap: 8px; }
+  .total-pill { flex: 1; text-align: center; background: #0f1117; border-radius: 8px; padding: 8px 4px; }
+  .total-pill .big { font-size: 1.05rem; font-weight: 700; }
+  .total-pill .sm { font-size: 0.6rem; color: #64748b; margin-top: 2px; }
+  .prog-wrap { margin-top: 10px; }
+  .prog-label { display: flex; justify-content: space-between; font-size: 0.65rem; color: #64748b; margin-bottom: 3px; margin-top: 6px; }
+  .prog-bar { height: 5px; background: #2d3748; border-radius: 3px; overflow: hidden; }
+  .prog-fill { height: 100%; border-radius: 3px; }
+
+  /* Weekly summary */
+  .week-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .w-card { background: #1e2535; border-radius: 12px; padding: 13px; border: 1px solid #2d3748; }
+  .w-card h3 { font-size: 0.82rem; color: #34d399; margin-bottom: 10px; }
+  .w-row { display: flex; justify-content: space-between; font-size: 0.77rem; padding: 4px 0; border-bottom: 1px solid #1a2030; }
+  .w-row:last-child { border-bottom: none; }
+  .w-row .day { color: #94a3b8; }
+  .w-row .kcal { color: #34d399; font-weight: 600; }
+  .w-row .prot { color: #60a5fa; }
+
+  .tip { background: #1c2a1c; border: 1px solid #2d5a2d; border-radius: 10px; padding: 11px; font-size: 0.78rem; color: #86efac; margin-top: 12px; line-height: 1.7; }
+  .tip strong { color: #34d399; }
+  .warn { background: #2a1e1e; border: 1px solid #5a2d2d; border-radius: 10px; padding: 11px; font-size: 0.78rem; color: #fca5a5; margin-top: 10px; line-height: 1.7; }
+  .warn strong { color: #f87171; }
+</style>
+</head>
+<body>
+
+<h1>🍽 برنامه غذایی Bulk</h1>
+<p class="subtitle">قد ۱۹۰ · وزن ۸۳ کیلو · آلمان · بدون کنسرو</p>
+
+<div class="stats">
+  <div class="stat"><div class="v">۳۱۰۰–۳۳۰۰</div><div class="l">کالری روزهای تمرین</div></div>
+  <div class="stat"><div class="v">۲۷۰۰–۲۹۰۰</div><div class="l">کالری روزهای استراحت</div></div>
+  <div class="stat"><div class="v">۱۷۰g+</div><div class="l">پروتئین روزانه</div></div>
+  <div class="stat"><div class="v">BMI 23</div><div class="l">جای خوب برای Bulk</div></div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="show('meals',this)">🍽 وعده‌های روزانه</button>
+  <button class="tab" onclick="show('week',this)">📅 خلاصه هفته</button>
+  <button class="tab" onclick="show('tips',this)">💡 نکات مهم</button>
+  <button class="tab" onclick="show('shop',this)">🛒 لیست خرید</button>
+</div>
+
+<!-- MEALS -->
+<div id="meals" class="section active">
+  <div class="day-tabs">
+    <button class="day-tab active" onclick="showDay('train',this)">💪 روز تمرین (Mo/Di/Do)</button>
+    <button class="day-tab" onclick="showDay('cardio',this)">🏃 روز کاردیو (Mi/Fr)</button>
+    <button class="day-tab" onclick="showDay('rest',this)">😴 روز استراحت (Sa/So)</button>
+    <button class="day-tab" onclick="showDay('office',this)">🏢 ناهار شرکت</button>
+  </div>
+
+  <!-- TRAIN DAY -->
+  <div id="train" class="day-content active">
+    <div class="meals">
+
+      <div class="meal pre">
+        <div class="meal-header">
+          <span class="meal-time">05:15</span>
+          <span class="meal-icon">⚡</span>
+          <span class="meal-name">پیش‌وعده ورزش</span>
+          <span class="meal-cal">~220 kcal</span>
+        </div>
+        <div class="meal-items">
+          <div class="meal-item"><span class="item-name">🍌 موز بزرگ (150g)</span><span class="item-macros">35g کربو · 1.5g پروتئین</span></div>
+          <div class="meal-item"><span class="item-name">🥜 کره بادام‌زمینی طبیعی (1.5 قاشق)</span><span class="item-macros">6g پروتئین · 12g چربی</span></div>
+        </div>
+        <div class="macros-bar">
+          <div class="macro-pill"><div class="val p-col">7g</div><div class="lbl">پروتئین</div></div>
+          <div class="macro-pill"><div class="val c-col">38g</div><div class="lbl">کربو</div></div>
+          <div class="macro-pill"><div class="val f-col">12g</div><div class="lbl">چربی</div></div>
+          <div class="macro-pill"><div class="val k-col">220</div><div class="lbl">kcal</div></div>
+        </div>
+      </div>
+
+      <div class="meal post">
+        <div class="meal-header">
+          <span class="meal-time">07:00</span>
+          <span class="meal-icon">🍳</span>
+          <span class="meal-name">صبحانه اصلی — Post Workout</span>
+          <span class="meal-cal">~750 kcal</span>
+        </div>
+        <div class="meal-items">
+          <div class="meal-item"><span class="item-name">🥚 تخم‌مرغ کامل (3 عدد)</span><span class="item-macros">18g پروتئین · 15g چربی · 210 kcal</span></div>
+          <div class="meal-item"><span class="item-name">🥚 سفیده اضافه (2 عدد)</span><span class="item-macros">7g پروتئین · 0g چربی · 34 kcal</span></div>
+          <div class="meal-item"><span class="item-name">🌾 Haferflocken — 100g (خشک)</span><span class="item-macros">13g پروتئین · 60g کربو · 350 kcal</span></div>
+          <div class="meal-item"><span class="item-name">🍌 موز (نصف)</span><span class="item-macros">13g کربو · 50 kcal</span></div>
+          <div class="meal-item"><span class="item-name">🥛 Skyr — 200g</span><span class="item-macros">20g پروتئین · 12g کربو · 120 kcal</span></div>
+          <div class="meal-item"><span class="item-name">🍯 عسل (1 قاشق چایخوری)</span><span class="item-macros">8g کربو · 30 kcal</span></div>
+        </div>
+        <div class="macros-bar">
+          <div class="macro-pill"><div class="val p-col">58g</div><div class="lbl">پروتئین</div></div>
+          <div class="macro-pill"><div class="val c-col">93g</div><div class="lbl">کربو</div></div>
+          <div class="macro-pill"><div class="val f-col">15g</div><div class="lbl">چربی</div></div>
+          <div class="macro-pill"><div class="val k-col">750</div><div class="lbl">kcal</div></div>
+        </div>
+      </div>
+
+      <div class="meal snack">
+        <div class="meal-header">
+          <span class="meal-time">10:30</span>
+          <span class="meal-icon">🥜</span>
+          <span class="meal-name">میان‌وعده سر کار</span>
+          <span class="meal-cal">~350 kcal</span>
+        </div>
+        <div class="meal-items">
+          <div class="meal-item"><span class="item-name">🧀 Hüttenkäse — 250g</span><span class="item-macros">28g پروتئین · 5g چربی · 150 kcal</span></div>
+          <div class="meal-item"><span class="item-name">🍞 Vollkornbrot — 2 تکه</span><span class="item-macros">8g پروتئین · 36g کربو · 180 kcal</span></div>
+          <div class="meal-item"><span class="item-name">🥒 خیار یا گوجه</span><span class="item-macros">کالری ناچیز</span></div>
+        </div>
+        <div class="macros-bar">
+          <div class="macro-pill"><div class="val p-col">36g</div><div class="lbl">پروتئین</div></div>
+          <div class="macro-pill"><div class="val c-col">40g</div><div class="lbl">کربو</div></div>
+          <div class="macro-pill"><div class="val f-col">5g</div><div class="lbl">چربی</div></div>
+          <div class="macro-pill"><div class="val k-col">350</div><div class="lbl">kcal</div></div>
+        </div>
+      </div>
+
+      <div class="meal lunch">
+        <div class="meal-header">
+          <span class="meal-time">12:30</span>
+          <span class="meal-icon">🥗</span>
+          <span class="meal-name">ناهار — خانه / Meal Prep</span>
+          <span class="meal-cal">~750 kcal</span>
+        </div>
+        <div class="meal-items">
+          <div class="meal-item"><span class="item-name">🍗 سینه مرغ — 200g (پخته)</span><span class="item-macros">46g پروتئین · 3g چربی · 220 kcal</span></div>
+          <div class="meal-item"><span class="item-name">🍚 برنج قهوه‌ای — 150g (پخته)</span><span class="item-macros">4g پروتئین · 45g کربو · 200 kcal</span></div>
+          <div class="meal-item"><span class="item-name">🥦 بروکلی یا سبزی بخارپز — 150g</span><span class="item-macros">4g پروتئین · 8g کربو · 50 kcal</span></div>
+          <div class="meal-item"><span class="item-name">🍄 قارچ تفت‌داده — 100g</span><span class="item-macros">3g پروتئین · 4g کربو · 30 kcal</span></div>
+          <div class="meal-item"><span class="item-name">🫒 روغن زیتون (1 قاشق)</span><span class="item-macros">0g پروتئین · 14g چربی · 120 kcal</span></div>
+        </div>
+        <div class="macros-bar">
+          <div class="macro-pill"><div class="val p-col">57g</div><div class="lbl">پروتئین</div></div>
+          <div class="macro-pill"><div class="val c-col">57g</div><div class="lbl">کربو</div></div>
+          <div class="macro-pill"><div class="val f-col">17g</div><div class="lbl">چربی</div></div>
+          <div class="macro-pill"><div class="val k-col">620</div><div class="lbl">kcal</div></div>
+        </div>
+      </div>
+
+      <div class="meal snack">
+        <div class="meal-header">
+          <span class="meal-time">15:30</span>
+          <span class="meal-icon">🍎</span>
+          <span class="meal-name">میان‌وعده بعدازظهر</span>
+          <span class="meal-cal">~300 kcal</span>
+        </div>
+        <div class="meal-items">
+          <div class="meal-item"><span class="item-name">🥛 Skyr یا ماست یونانی — 200g</span><span class="item-macros">20g پروتئین · 12g کربو · 120 kcal</span></div>
+          <div class="meal-item"><span class="item-name">🫐 بلوبری یا توت‌فرنگی — 100g</span><span class="item-macros">1g پروتئین · 14g کربو · 57 kcal</span></div>
+          <div class="meal-item"><span class="item-name">🥜 آجیل مخلوط — 30g</span><span class="item-macros">5g پروتئین · 15g چربی · 180 kcal</span></div>
+        </div>
+        <div class="macros-bar">
+          <div class="macro-pill"><div class="val p-col">26g</div><div class="lbl">پروتئین</div></div>
+          <div class="macro-pill"><div class="val c-col">26g</div><div class="lbl">کربو</div></div>
+          <div class="macro-pill"><div class="val f-col">15g</div><div class="lbl">چربی</div></div>
+          <div class="macro-pill"><div class="val k-col">300</div><div class="lbl">kcal</div></div>
+        </div>
+      </div>
+
+      <div class="meal dinner">
+        <div class="meal-header">
+          <span class="meal-time">18:30</span>
+          <span class="meal-icon">🍽</span>
+          <span class="meal-name">شام</span>
+          <span class="meal-cal">~700 kcal</span>
+        </div>
+        <div class="meal-items">
+          <div class="meal-item"><span class="item-name">🐟 Räucherlachs — 150g</span><span class="item-macros">32g پروتئین · 15g چربی · 270 kcal</span></div>
+          <div class="meal-item"><span class="item-name">🥔 سیب‌زمینی آب‌پز — 250g</span><span class="item-macros">5g پروتئین · 45g کربو · 210 kcal</span></div>
+          <div class="meal-item"><span class="item-name">🥗 سالاد سبزیجات بزرگ</span><span class="item-macros">3g پروتئین · 10g کربو · 60 kcal</span></div>
+          <div class="meal-item"><span class="item-name">🫒 روغن زیتون + آب‌لیمو (سس)</span><span class="item-macros">0g پروتئین · 10g چربی · 90 kcal</span></div>
+        </div>
+        <div class="macros-bar">
+          <div class="macro-pill"><div class="val p-col">40g</div><div class="lbl">پروتئین</div></div>
+          <div class="macro-pill"><div class="val c-col">55g</div><div class="lbl">کربو</div></div>
+          <div class="macro-pill"><div class="val f-col">25g</div><div class="lbl">چربی</div></div>
+          <div class="macro-pill"><div class="val k-col">630</div><div class="lbl">kcal</div></div>
+        </div>
+      </div>
+
+      <div class="meal night">
+        <div class="meal-header">
+          <span class="meal-time">21:30</span>
+          <span class="meal-icon">🌙</span>
+          <span class="meal-name">وعده قبل خواب</span>
+          <span class="meal-cal">~200 kcal</span>
+        </div>
+        <div class="meal-items">
+          <div class="meal-item"><span class="item-name">🫙 Quark — 250g</span><span class="item-macros">28g پروتئین · 5g کربو · 130 kcal</span></div>
+          <div class="meal-item"><span class="item-name">🍯 عسل (1 قاشق چایخوری)</span><span class="item-macros">8g کربو · 30 kcal</span></div>
+          <div class="meal-item"><span class="item-name">🫐 کمی بلوبری (اختیاری)</span><span class="item-macros">7g کربو · 30 kcal</span></div>
+        </div>
+        <div class="macros-bar">
+          <div class="macro-pill"><div class="val p-col">28g</div><div class="lbl">پروتئین</div></div>
+          <div class="macro-pill"><div class="val c-col">20g</div><div class="lbl">کربو</div></div>
+          <div class="macro-pill"><div class="val f-col">2g</div><div class="lbl">چربی</div></div>
+          <div class="macro-pill"><div class="val k-col">200</div><div class="lbl">kcal</div></div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="daily-total">
+      <h3>📊 جمع روز تمرین</h3>
+      <div class="total-row">
+        <div class="total-pill"><div class="big p-col">252g</div><div class="sm">پروتئین ✅</div></div>
+        <div class="total-pill"><div class="big c-col">329g</div><div class="sm">کربوهیدرات</div></div>
+        <div class="total-pill"><div class="big f-col">91g</div><div class="sm">چربی</div></div>
+        <div class="total-pill"><div class="big k-col">3150</div><div class="sm">kcal ✅</div></div>
+      </div>
+      <div class="prog-wrap">
+        <div class="prog-label"><span>پروتئین (هدف: ۱۷۰g+)</span><span class="p-col">252g ✅</span></div>
+        <div class="prog-bar"><div class="prog-fill" style="width:100%;background:#34d399"></div></div>
+        <div class="prog-label"><span>کالری (هدف: ۳۱۰۰–۳۳۰۰)</span><span class="k-col">3150 ✅</span></div>
+        <div class="prog-bar"><div class="prog-fill" style="width:96%;background:#a78bfa"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CARDIO DAY -->
+  <div id="cardio" class="day-content">
+    <div class="meals">
+      <div class="meal post">
+        <div class="meal-header">
+          <span class="meal-time">06:45</span>
+          <span class="meal-icon">🥣</span>
+          <span class="meal-name">صبحانه (بعد کاردیو سبک)</span>
+          <span class="meal-cal">~550 kcal</span>
+        </div>
+        <div class="meal-items">
+          <div class="meal-item"><span class="item-name">🥚 تخم‌مرغ کامل (3 عدد)</span><span class="item-macros">18g پروتئین · 15g چربی</span></div>
+          <div class="meal-item"><span class="item-name">🌾 Haferflocken — 80g</span><span class="item-macros">10g پروتئین · 48g کربو</span></div>
+          <div class="meal-item"><span class="item-name">🍌 موز</span><span class="item-macros">1g پروتئین · 27g کربو</span></div>
+          <div class="meal-item"><span class="item-name">☕ قهوه (اختیاری)</span><span class="item-macros">—</span></div>
+        </div>
+        <div class="macros-bar">
+          <div class="macro-pill"><div class="val p-col">29g</div><div class="lbl">پروتئین</div></div>
+          <div class="macro-pill"><div class="val c-col">75g</div><div class="lbl">کربو</div></div>
+          <div class="macro-pill"><div class="val f-col">15g</div><div class="lbl">چربی</div></div>
+          <div class="macro-pill"><div class="val k-col">555</div><div class="lbl">kcal</div></div>
+        </div>
+      </div>
+
+      <div class="meal snack">
+        <div class="meal-header">
+          <span class="meal-time">10:30</span>
+          <span class="meal-icon">🥜</span>
+          <span class="meal-name">میان‌وعده</span>
+          <span class="meal-cal">~300 kcal</span>
+        </div>
+        <div class="meal-items">
+          <div class="meal-item"><span class="item-name">🧀 Hüttenkäse — 200g</span><span class="item-macros">22g پروتئین</span></div>
+          <div class="meal-item"><span class="item-name">🍎 سیب یا میوه فصل</span><span class="item-macros">20g کربو</span></div>
+        </div>
+        <div class="macros-bar">
+          <div class="macro-pill"><div class="val p-col">23g</div><div class="lbl">پروتئین</div></div>
+          <div class="macro-pill"><div class="val c-col">25g</div><div class="lbl">کربو</div></div>
+          <div class="macro-pill"><div class="val f-col">4g</div><div class="lbl">چربی</div></div>
+          <div class="macro-pill"><div class="val k-col">230</div><div class="lbl">kcal</div></div>
+        </div>
+      </div>
+
+      <div class="meal lunch">
+        <div class="meal-header">
+          <span class="meal-time">12:30</span>
+          <span class="meal-icon">🥗</span>
+          <span class="meal-name">ناهار — کمی کربو کمتر</span>
+          <span class="meal-cal">~550 kcal</span>
+        </div>
+        <div class="meal-items">
+          <div class="meal-item"><span class="item-name">🍗 سینه مرغ — 200g</span><span class="item-macros">46g پروتئین</span></div>
+          <div class="meal-item"><span class="item-name">🥔 سیب‌زمینی کوچک — 150g</span><span class="item-macros">27g کربو</span></div>
+          <div class="meal-item"><span class="item-name">🍄 قارچ + سبزیجات بخارپز</span><span class="item-macros">10g کربو</span></div>
+        </div>
+        <div class="macros-bar">
+          <div class="macro-pill"><div class="val p-col">50g</div><div class="lbl">پروتئین</div></div>
+          <div class="macro-pill"><div class="val c-col">40g</div><div class="lbl">کربو</div></div>
+          <div class="macro-pill"><div class="val f-col">10g</div><div class="lbl">چربی</div></div>
+          <div class="macro-pill"><div class="val k-col">460</div><div class="lbl">kcal</div></div>
+        </div>
+      </div>
+
+      <div class="meal dinner">
+        <div class="meal-header">
+          <span class="meal-time">18:30</span>
+          <span class="meal-icon">🍽</span>
+          <span class="meal-name">شام</span>
+          <span class="meal-cal">~600 kcal</span>
+        </div>
+        <div class="meal-items">
+          <div class="meal-item"><span class="item-name">🐟 Räucherlachs — 150g</span><span class="item-macros">32g پروتئین · 15g چربی</span></div>
+          <div class="meal-item"><span class="item-name">🥗 سالاد بزرگ با آووکادو</span><span class="item-macros">5g پروتئین · 15g چربی</span></div>
+          <div class="meal-item"><span class="item-name">🍞 Vollkornbrot — 1 تکه</span><span class="item-macros">4g پروتئین · 18g کربو</span></div>
+        </div>
+        <div class="macros-bar">
+          <div class="macro-pill"><div class="val p-col">41g</div><div class="lbl">پروتئین</div></div>
+          <div class="macro-pill"><div class="val c-col">25g</div><div class="lbl">کربو</div></div>
+          <div class="macro-pill"><div class="val f-col">30g</div><div class="lbl">چربی</div></div>
+          <div class="macro-pill"><div class="val k-col">540</div><div class="lbl">kcal</div></div>
+        </div>
+      </div>
+
+      <div class="meal night">
+        <div class="meal-header">
+          <span class="meal-time">21:30</span>
+          <span class="meal-icon">🌙</span>
+          <span class="meal-name">Quark قبل خواب</span>
+          <span class="meal-cal">~160 kcal</span>
+        </div>
+        <div class="meal-items">
+          <div class="meal-item"><span class="item-name">🫙 Quark — 250g + عسل</span><span class="item-macros">28g پروتئین · 13g کربو</span></div>
+        </div>
+        <div class="macros-bar">
+          <div class="macro-pill"><div class="val p-col">28g</div><div class="lbl">پروتئین</div></div>
+          <div class="macro-pill"><div class="val c-col">13g</div><div class="lbl">کربو</div></div>
+          <div class="macro-pill"><div class="val f-col">1g</div><div class="lbl">چربی</div></div>
+          <div class="macro-pill"><div class="val k-col">160</div><div class="lbl">kcal</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="daily-total">
+      <h3>📊 جمع روز کاردیو</h3>
+      <div class="total-row">
+        <div class="total-pill"><div class="big p-col">171g</div><div class="sm">پروتئین ✅</div></div>
+        <div class="total-pill"><div class="big c-col">178g</div><div class="sm">کربوهیدرات</div></div>
+        <div class="total-pill"><div class="big f-col">60g</div><div class="sm">چربی</div></div>
+        <div class="total-pill"><div class="big k-col">1945</div><div class="sm">kcal</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REST DAY -->
+  <div id="rest" class="day-content">
+    <div class="tip" style="margin-bottom:12px">
+      💡 <strong>روز استراحت:</strong> کربو رو کم کن، پروتئین رو نگه دار. هدف ~۲۷۰۰ کیلوکالری.
+    </div>
+    <div class="meals">
+      <div class="meal post">
+        <div class="meal-header">
+          <span class="meal-time">08:00</span>
+          <span class="meal-icon">🥞</span>
+          <span class="meal-name">صبحانه آرام (بدون عجله)</span>
+          <span class="meal-cal">~600 kcal</span>
+        </div>
+        <div class="meal-items">
+          <div class="meal-item"><span class="item-name">🥚 تخم‌مرغ (4 عدد) + قارچ</span><span class="item-macros">28g پروتئین</span></div>
+          <div class="meal-item"><span class="item-name">🍞 Vollkornbrot — 2 تکه</span><span class="item-macros">8g پروتئین · 36g کربو</span></div>
+          <div class="meal-item"><span class="item-name">🧀 Hüttenkäse — 100g</span><span class="item-macros">11g پروتئین</span></div>
+          <div class="meal-item"><span class="item-name">☕ قهوه + شیر کم‌چرب</span><span class="item-macros">4g پروتئین</span></div>
+        </div>
+        <div class="macros-bar">
+          <div class="macro-pill"><div class="val p-col">51g</div><div class="lbl">پروتئین</div></div>
+          <div class="macro-pill"><div class="val c-col">45g</div><div class="lbl">کربو</div></div>
+          <div class="macro-pill"><div class="val f-col">20g</div><div class="lbl">چربی</div></div>
+          <div class="macro-pill"><div class="val k-col">580</div><div class="lbl">kcal</div></div>
+        </div>
+      </div>
+
+      <div class="meal lunch">
+        <div class="meal-header">
+          <span class="meal-time">13:00</span>
+          <span class="meal-icon">🍳</span>
+          <span class="meal-name">ناهار — Meal Prep شنبه</span>
+          <span class="meal-cal">~700 kcal</span>
+        </div>
+        <div class="meal-items">
+          <div class="meal-item"><span class="item-name">🍗 مرغ — 200g + قارچ تفت‌داده</span><span class="item-macros">49g پروتئین</span></div>
+          <div class="meal-item"><span class="item-name">🥦 سبزیجات بخارپز — 200g</span><span class="item-macros">8g پروتئین · 15g کربو</span></div>
+          <div class="meal-item"><span class="item-name">🍚 برنج قهوه‌ای — 100g پخته</span><span class="item-macros">2g پروتئین · 28g کربو</span></div>
+        </div>
+        <div class="macros-bar">
+          <div class="macro-pill"><div class="val p-col">59g</div><div class="lbl">پروتئین</div></div>
+          <div class="macro-pill"><div class="val c-col">45g</div><div class="lbl">کربو</div></div>
+          <div class="macro-pill"><div class="val f-col">12g</div><div class="lbl">چربی</div></div>
+          <div class="macro-pill"><div class="val k-col">530</div><div class="lbl">kcal</div></div>
+        </div>
+      </div>
+
+      <div class="meal dinner">
+        <div class="meal-header">
+          <span class="meal-time">18:30</span>
+          <span class="meal-icon">🍽</span>
+          <span class="meal-name">شام</span>
+          <span class="meal-cal">~650 kcal</span>
+        </div>
+        <div class="meal-items">
+          <div class="meal-item"><span class="item-name">🐟 ماهی تازه یا Räucherlachs — 200g</span><span class="item-macros">42g پروتئین</span></div>
+          <div class="meal-item"><span class="item-name">🥗 سالاد بزرگ + آووکادو</span><span class="item-macros">20g چربی سالم</span></div>
+          <div class="meal-item"><span class="item-name">🍠 سیب‌زمینی شیرین — 150g</span><span class="item-macros">30g کربو</span></div>
+        </div>
+        <div class="macros-bar">
+          <div class="macro-pill"><div class="val p-col">45g</div><div class="lbl">پروتئین</div></div>
+          <div class="macro-pill"><div class="val c-col">38g</div><div class="lbl">کربو</div></div>
+          <div class="macro-pill"><div class="val f-col">28g</div><div class="lbl">چربی</div></div>
+          <div class="macro-pill"><div class="val k-col">590</div><div class="lbl">kcal</div></div>
+        </div>
+      </div>
+
+      <div class="meal night">
+        <div class="meal-header">
+          <span class="meal-time">21:30</span>
+          <span class="meal-icon">🌙</span>
+          <span class="meal-name">Quark قبل خواب</span>
+          <span class="meal-cal">~160 kcal</span>
+        </div>
+        <div class="meal-items">
+          <div class="meal-item"><span class="item-name">🫙 Quark — 250g + عسل + دارچین</span><span class="item-macros">28g پروتئین</span></div>
+        </div>
+        <div class="macros-bar">
+          <div class="macro-pill"><div class="val p-col">28g</div><div class="lbl">پروتئین</div></div>
+          <div class="macro-pill"><div class="val c-col">13g</div><div class="lbl">کربو</div></div>
+          <div class="macro-pill"><div class="val f-col">1g</div><div class="lbl">چربی</div></div>
+          <div class="macro-pill"><div class="val k-col">165</div><div class="lbl">kcal</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="daily-total">
+      <h3>📊 جمع روز استراحت</h3>
+      <div class="total-row">
+        <div class="total-pill"><div class="big p-col">183g</div><div class="sm">پروتئین ✅</div></div>
+        <div class="total-pill"><div class="big c-col">141g</div><div class="sm">کربوهیدرات</div></div>
+        <div class="total-pill"><div class="big f-col">61g</div><div class="sm">چربی</div></div>
+        <div class="total-pill"><div class="big k-col">1865</div><div class="sm">kcal</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OFFICE DAY -->
+  <div id="office" class="day-content">
+    <div class="tip" style="margin-bottom:12px">
+      🏢 <strong>روزهایی که کانتین شرکت داری:</strong> این راهنما برای انتخاب بهتر از منو کانتین.
+    </div>
+    <div class="meals">
+      <div class="meal lunch">
+        <div class="meal-header">
+          <span class="meal-time">12:00</span>
+          <span class="meal-icon">🍽</span>
+          <span class="meal-name">کانتین — چی انتخاب کنی</span>
+          <span class="meal-cal">~600–800 kcal</span>
+        </div>
+        <div class="meal-items">
+          <div class="meal-item"><span class="item-name">✅ مرغ / ماهی + سبزیجات</span><span class="item-macros">بهترین انتخاب</span></div>
+          <div class="meal-item"><span class="item-name">✅ سالاد بزرگ + پروتئین</span><span class="item-macros">اگه گرسنگی کمه</span></div>
+          <div class="meal-item"><span class="item-name">✅ ماکارونی با مرغ (نه خامه)</span><span class="item-macros">کربو + پروتئین</span></div>
+          <div class="meal-item"><span class="item-name">⚠️ غذاهای سرخ‌شده</span><span class="item-macros">اگه گزینه دیگه نیست، اوکه</span></div>
+          <div class="meal-item"><span class="item-name">❌ پیتزا / فست‌فود</span><span class="item-macros">چربی بد، پروتئین کم</span></div>
+        </div>
+      </div>
+      <div class="warn">
+        ⚠️ <strong>نکته کانتین:</strong> معمولاً سس‌ها کالری مخفی زیاد دارن. سس رو کم بخواه یا کنار بذار. اگه پورسیون کوچیکه، یه ماست یا Hüttenkäse از خونه بیار.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- WEEK SUMMARY -->
+<div id="week" class="section">
+  <div class="week-grid">
+    <div class="w-card">
+      <h3>📅 کالری هفتگی</h3>
+      <div class="w-row"><span class="day">Mo — سینه + سه‌سر</span><span class="kcal">۳۱۵۰</span><span class="prot">252g</span></div>
+      <div class="w-row"><span class="day">Di — پشت + دوسر</span><span class="kcal">۳۱۵۰</span><span class="prot">252g</span></div>
+      <div class="w-row"><span class="day">Mi — کاردیو سبک</span><span class="kcal">۱۹۴۵</span><span class="prot">171g</span></div>
+      <div class="w-row"><span class="day">Do — پا + شانه</span><span class="kcal">۳۳۰۰</span><span class="prot">260g</span></div>
+      <div class="w-row"><span class="day">Fr — HIIT + Core</span><span class="kcal">۱۹۴۵</span><span class="prot">171g</span></div>
+      <div class="w-row"><span class="day">Sa — استراحت</span><span class="kcal">۱۸۶۵</span><span class="prot">183g</span></div>
+      <div class="w-row"><span class="day">So — استراحت فعال</span><span class="kcal">۱۸۶۵</span><span class="prot">183g</span></div>
+      <div class="w-row" style="border-top:1px solid #334155;margin-top:4px;padding-top:6px"><span class="day" style="font-weight:700;color:#e2e8f0">میانگین روزانه</span><span class="kcal" style="font-size:0.88rem">~۲۴۶۰</span><span class="prot" style="font-size:0.88rem">210g</span></div>
+    </div>
+    <div class="w-card">
+      <h3>🛒 Meal Prep شنبه</h3>
+      <div class="w-row"><span class="day">مرغ سینه</span><span class="kcal">۸۰۰g بپز</span></div>
+      <div class="w-row"><span class="day">برنج قهوه‌ای</span><span class="kcal">۵۰۰g بپز</span></div>
+      <div class="w-row"><span class="day">بروکلی / سبزیجات</span><span class="kcal">۶۰۰g بخارپز</span></div>
+      <div class="w-row"><span class="day">قارچ تفت‌داده</span><span class="kcal">۴۰۰g</span></div>
+      <div class="w-row"><span class="day">تخم‌مرغ آب‌پز</span><span class="kcal">۱۰ عدد</span></div>
+      <div class="w-row"><span class="day">Haferflocken آماده</span><span class="kcal">۳ ظرف</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- TIPS -->
+<div id="tips" class="section">
+  <div class="tip">💡 <strong>قانون ۸۰/۲۰:</strong> ۸۰٪ روزها دقیق بخور، ۲۰٪ (یعنی ۱–۲ وعده در هفته) می‌تونی منعطف‌تر باشی. این پایداری رو بالا می‌بره.</div>
+  <div class="tip" style="margin-top:10px">🌊 <strong>آب:</strong> روزهای تمرین حداقل ۳.۵ لیتر. یه بطری ۱ لیتری همیشه روی میزت باشه.</div>
+  <div class="tip" style="margin-top:10px">⚖️ <strong>پیشرفت رو بسنج:</strong> هر دوشنبه صبح ناشتا وزن کن. اگه در ۴ هفته ۵۰۰g–۱kg اضافه نشدی، ۲۰۰ کیلوکالری اضافه کن.</div>
+  <div class="warn" style="margin-top:10px">⚠️ <strong>اگه سریع چاق شدی:</strong> هدف Bulk سالم ۲۵۰–۵۰۰g در هفته‌ست. بیشتر از این یعنی کالری زیادیه و چربی اضافه می‌شه.</div>
+</div>
+
+<div id="shop" class="section">
+  <div style="display:flex;gap:8px;justify-content:center;margin-bottom:14px;flex-wrap:wrap">
+    <div style="background:#1e2535;border-radius:10px;padding:7px 14px;text-align:center;border:1px solid #2d3748">
+      <div style="font-size:0.95rem;font-weight:700;color:#34d399" id="shopChecked">0</div>
+      <div style="font-size:0.6rem;color:#64748b">تیک زده</div>
+    </div>
+    <div style="background:#1e2535;border-radius:10px;padding:7px 14px;text-align:center;border:1px solid #2d3748">
+      <div style="font-size:0.95rem;font-weight:700;color:#34d399" id="shopTotal">0</div>
+      <div style="font-size:0.6rem;color:#64748b">کل اقلام</div>
+    </div>
+    <div style="background:#1e2535;border-radius:10px;padding:7px 14px;text-align:center;border:1px solid #2d3748">
+      <div style="font-size:0.95rem;font-weight:700;color:#a78bfa">~€45–55</div>
+      <div style="font-size:0.6rem;color:#64748b">هزینه هفتگی</div>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:6px;justify-content:center;margin-bottom:14px;flex-wrap:wrap" id="shopStoreTabs">
+    <button class="day-tab active" onclick="showShop('shopAll',this)">🛒 همه</button>
+    <button class="day-tab" onclick="showShop('shopAldi',this)">🔵 Aldi/Lidl</button>
+    <button class="day-tab" onclick="showShop('shopRewe',this)">🔴 Rewe/Edeka</button>
+  </div>
+
+  <div id="shopAll" class="day-content active"><div class="cat-grid2" id="shopAllGrid"></div></div>
+  <div id="shopAldi" class="day-content"><div class="cat-grid2" id="shopAldiGrid"></div>
+    <div class="tip" style="margin-top:12px">🔵 <strong>Aldi/Lidl:</strong> تخم‌مرغ، موز، Quark، Skyr، Haferflocken، مرغ فریزری، آجیل — ۶۰٪ خریدت اینجاست.</div>
+  </div>
+  <div id="shopRewe" class="day-content"><div class="cat-grid2" id="shopReweGrid"></div>
+    <div class="tip" style="margin-top:12px">🔴 <strong>Rewe/Edeka:</strong> Räucherlachs تازه، قارچ، آووکادو، سبزیجات تازه، Vollkornbrot.</div>
+  </div>
+
+  <div style="background:#1a2a3a;border:1px solid #2d4a6a;border-radius:12px;padding:12px 15px;margin-top:14px">
+    <div style="font-size:0.8rem;color:#60a5fa;margin-bottom:10px">💰 تخمین هزینه هفتگی</div>
+    <div style="display:flex;justify-content:space-between;font-size:0.78rem;padding:4px 0;border-bottom:1px solid #1a2030"><span style="color:#94a3b8">پروتئین (مرغ، ماهی، تخم‌مرغ)</span><span style="color:#34d399">~€18–22</span></div>
+    <div style="display:flex;justify-content:space-between;font-size:0.78rem;padding:4px 0;border-bottom:1px solid #1a2030"><span style="color:#94a3b8">لبنیات (Quark، Skyr، Hüttenkäse)</span><span style="color:#34d399">~€8–10</span></div>
+    <div style="display:flex;justify-content:space-between;font-size:0.78rem;padding:4px 0;border-bottom:1px solid #1a2030"><span style="color:#94a3b8">کربوهیدرات (جو، نان، برنج)</span><span style="color:#34d399">~€5–7</span></div>
+    <div style="display:flex;justify-content:space-between;font-size:0.78rem;padding:4px 0;border-bottom:1px solid #1a2030"><span style="color:#94a3b8">میوه و سبزیجات</span><span style="color:#34d399">~€8–10</span></div>
+    <div style="display:flex;justify-content:space-between;font-size:0.78rem;padding:4px 0"><span style="color:#e2e8f0;font-weight:700">جمع کل</span><span style="color:#34d399;font-weight:700">~€44–56</span></div>
+  </div>
+  <button onclick="resetShop()" style="display:block;margin:12px auto 0;padding:8px 20px;border-radius:20px;border:1px solid #334155;background:transparent;color:#64748b;cursor:pointer;font-size:0.75rem">🔄 شروع مجدد لیست</button>
+</div>
+
+<script>
+// Shopping list
+const shopCategories = [
+  { name:'پروتئین اصلی', icon:'🍗', items:[
+    { name:'سینه مرغ', sub:'Hähnchenbrustfilet', amount:'1.5 کیلو', price:'~€9', store:'aldi' },
+    { name:'Räucherlachs (ماهی دودی)', sub:'برش‌های ۱۰۰–۱۵۰g', amount:'400g', price:'~€5', store:'rewe' },
+    { name:'ماهی تازه یا فریزری', sub:'Lachs / Forelle', amount:'400g', price:'~€5', store:'rewe' },
+    { name:'تخم‌مرغ', sub:'Eier Größe M یا L', amount:'18 عدد', price:'~€3.5', store:'aldi' },
+  ]},
+  { name:'لبنیات پروتئینی', icon:'🥛', items:[
+    { name:'Quark (Magerquark)', sub:'کازئین طبیعی — وعده شب', amount:'3 × 500g', price:'~€3', store:'aldi' },
+    { name:'Skyr یا ماست یونانی', sub:'Griechischer Joghurt', amount:'4 × 200g', price:'~€4', store:'aldi' },
+    { name:'Hüttenkäse', sub:'پنیر کم‌چرب — میان‌وعده', amount:'2 × 200g', price:'~€2.5', store:'aldi' },
+    { name:'شیر کم‌چرب', sub:'Fettarme Milch 1.5%', amount:'1 لیتر', price:'~€1', store:'aldi' },
+  ]},
+  { name:'کربوهیدرات', icon:'🌾', items:[
+    { name:'Haferflocken (جو دوسر)', sub:'Kernige یا zarte', amount:'1 کیلو', price:'~€1.5', store:'aldi' },
+    { name:'Vollkornbrot (نان سبوس‌دار)', sub:'میان‌وعده و شام', amount:'1 قرص', price:'~€2.5', store:'rewe' },
+    { name:'برنج قهوه‌ای', sub:'Naturreis — Meal Prep', amount:'500g', price:'~€1.5', store:'aldi' },
+    { name:'سیب‌زمینی', sub:'Kartoffeln — شام', amount:'1.5 کیلو', price:'~€2', store:'aldi' },
+    { name:'سیب‌زمینی شیرین', sub:'Süßkartoffeln', amount:'500g', price:'~€2', store:'rewe' },
+  ]},
+  { name:'میوه', icon:'🍌', items:[
+    { name:'موز', sub:'Bananen — پیش‌وعده ورزش', amount:'8–10 عدد', price:'~€2', store:'aldi' },
+    { name:'بلوبری', sub:'Blaubeeren — با Quark', amount:'250g', price:'~€2.5', store:'aldi' },
+    { name:'توت‌فرنگی', sub:'Erdbeeren', amount:'250g', price:'~€2', store:'aldi' },
+    { name:'سیب', sub:'Äpfel — میان‌وعده', amount:'4 عدد', price:'~€1.5', store:'aldi' },
+  ]},
+  { name:'سبزیجات', icon:'🥦', items:[
+    { name:'قارچ', sub:'Champignons', amount:'500g', price:'~€2', store:'rewe' },
+    { name:'بروکلی', sub:'Brokkoli تازه یا فریزری', amount:'500g', price:'~€1.5', store:'aldi' },
+    { name:'اسفناج فریزری', sub:'Tiefkühl Spinat', amount:'450g', price:'~€1.5', store:'aldi' },
+    { name:'گوجه‌فرنگی', sub:'Tomaten', amount:'500g', price:'~€1.5', store:'rewe' },
+    { name:'خیار', sub:'Gurke', amount:'2 عدد', price:'~€1', store:'rewe' },
+    { name:'آووکادو', sub:'Avocado — چربی سالم', amount:'2 عدد', price:'~€2', store:'rewe' },
+  ]},
+  { name:'چربی‌های سالم', icon:'🥜', items:[
+    { name:'کره بادام‌زمینی طبیعی', sub:'Erdnussmus (بدون شکر)', amount:'500g', price:'~€3', store:'aldi' },
+    { name:'آجیل مخلوط', sub:'Nussmischung بدون نمک', amount:'200g', price:'~€3', store:'aldi' },
+    { name:'روغن زیتون', sub:'Olivenöl', amount:'500ml', price:'~€3.5', store:'aldi' },
+  ]},
+  { name:'متفرقه', icon:'🍯', items:[
+    { name:'عسل طبیعی', sub:'Honig', amount:'250g', price:'~€2.5', store:'aldi' },
+    { name:'دارچین', sub:'Zimt', amount:'1 بسته', price:'~€1', store:'aldi' },
+    { name:'خرما', sub:'Datteln — پیش‌وعده ورزش', amount:'200g', price:'~€2.5', store:'aldi' },
+    { name:'آب معدنی', sub:'Mineralwasser', amount:'6 × 1.5L', price:'~€3', store:'aldi' },
+  ]},
+];
+const shopState = {};
+
+function renderShopGrid(containerId, filterStore) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = '';
+  let total = 0, checked = 0;
+  shopCategories.forEach((cat, ci) => {
+    const filtered = filterStore === 'all' ? cat.items : cat.items.filter(i => i.store === filterStore);
+    if (!filtered.length) return;
+    total += filtered.length;
+    const doneCount = filtered.filter((item) => shopState[`${ci}-${cat.items.indexOf(item)}`]).length;
+    checked += doneCount;
+    const card = document.createElement('div');
+    card.style.cssText = 'background:#1e2535;border-radius:12px;overflow:hidden;border:1px solid #2d3748;margin-bottom:10px';
+    card.innerHTML = `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#1a2030">
+      <span style="font-size:1.1rem">${cat.icon}</span>
+      <span style="font-size:0.88rem;font-weight:700;flex:1">${cat.name}</span>
+      <span style="font-size:0.68rem;color:#64748b">${doneCount}/${filtered.length}</span>
+      <span style="font-size:0.68rem;color:#34d399">${doneCount===filtered.length&&filtered.length>0?'✅':''}</span>
+    </div>`;
+    filtered.forEach((item) => {
+      const originalIdx = cat.items.indexOf(item);
+      const key = `${ci}-${originalIdx}`;
+      const isDone = shopState[key];
+      const row = document.createElement('div');
+      row.style.cssText = `display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid #1a2030;cursor:pointer;opacity:${isDone?'0.5':'1'}`;
+      const storeBadge = item.store==='aldi'
+        ? '<span style="font-size:0.6rem;padding:1px 6px;border-radius:8px;background:#1a2744;color:#60a5fa;border:1px solid #2d4a8a">Aldi/Lidl</span>'
+        : '<span style="font-size:0.6rem;padding:1px 6px;border-radius:8px;background:#2a1a1a;color:#f87171;border:1px solid #5a2d2d">Rewe/Edeka</span>';
+      row.innerHTML = `
+        <div style="width:20px;height:20px;border-radius:5px;border:2px solid ${isDone?'#34d399':'#334155'};background:${isDone?'#34d399':'transparent'};flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:#0f1117;font-weight:700">${isDone?'✓':''}</div>
+        <div style="flex:1">
+          <div style="font-size:0.82rem;${isDone?'text-decoration:line-through;color:#475569':'color:#e2e8f0'}">${item.name}</div>
+          <div style="font-size:0.67rem;color:#64748b;margin-top:1px">${item.sub} ${storeBadge}</div>
+        </div>
+        <span style="font-size:0.68rem;color:#475569;white-space:nowrap">${item.price}</span>
+        <span style="font-size:0.75rem;font-weight:600;color:#a78bfa;white-space:nowrap">${item.amount}</span>`;
+      row.onclick = () => { shopState[key] = !shopState[key]; renderAllShop(); };
+      card.appendChild(row);
+    });
+    container.appendChild(card);
+  });
+  if (containerId === 'shopAllGrid') {
+    document.getElementById('shopChecked').textContent = checked;
+    document.getElementById('shopTotal').textContent = total;
+  }
+}
+
+function renderAllShop() {
+  renderShopGrid('shopAllGrid', 'all');
+  renderShopGrid('shopAldiGrid', 'aldi');
+  renderShopGrid('shopReweGrid', 'rewe');
+}
+
+function showShop(id, btn) {
+  document.querySelectorAll('#shopStoreTabs .day-tab').forEach(t => t.classList.remove('active'));
+  ['shopAll','shopAldi','shopRewe'].forEach(i => { const el=document.getElementById(i); if(el){el.classList.remove('active');} });
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function resetShop() {
+  Object.keys(shopState).forEach(k => delete shopState[k]);
+  renderAllShop();
+}
+
+renderAllShop();
+
+function show(id, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+function showDay(id, btn) {
+  document.querySelectorAll('.day-content').forEach(d => d.classList.remove('active'));
+  document.querySelectorAll('.day-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+</script>
+</body>
+</html>

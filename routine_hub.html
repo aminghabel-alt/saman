@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Routine Hub — امین</title>
+<style>
+  :root {
+    --bg: #080b12;
+    --bg1: #0d1117;
+    --bg2: #111827;
+    --bg3: #1a2235;
+    --border: #1e293b;
+    --border2: #263044;
+    --text: #e2e8f0;
+    --text2: #94a3b8;
+    --text3: #475569;
+    --blue: #60a5fa;
+    --blue-d: #1e3a5f;
+    --green: #34d399;
+    --green-d: #1e3a2f;
+    --orange: #f97316;
+    --orange-d: #3d1a0a;
+    --purple: #a78bfa;
+    --purple-d: #2d1e4a;
+    --yellow: #fbbf24;
+    --red: #f87171;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; overflow: hidden; }
+  body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; background: var(--bg); color: var(--text); direction: rtl; }
+
+  /* ---- LAYOUT ---- */
+  #app { display: flex; flex-direction: column; height: 100vh; }
+
+  /* ---- HEADER ---- */
+  .header {
+    background: linear-gradient(135deg, #0f1f3d 0%, var(--bg1) 100%);
+    padding: 14px 16px 10px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    z-index: 10;
+  }
+  .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .header-title { font-size: 1rem; font-weight: 800; color: var(--text); letter-spacing: -0.02em; }
+  .header-title span { color: var(--blue); }
+  .header-date { font-size: 0.68rem; color: var(--text3); background: var(--bg3); padding: 3px 10px; border-radius: 20px; border: 1px solid var(--border); }
+  .day-strip { display: flex; gap: 5px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
+  .day-strip::-webkit-scrollbar { display: none; }
+  .day-btn {
+    padding: 5px 13px; border-radius: 14px; border: 1px solid var(--border);
+    background: transparent; color: var(--text3); cursor: pointer;
+    font-size: 0.7rem; white-space: nowrap; transition: all 0.2s; flex-shrink: 0;
+    font-family: inherit;
+  }
+  .day-btn.active { background: var(--blue-d); color: var(--blue); border-color: #2d5a8a; font-weight: 700; }
+  .day-btn .today-dot { display: inline-block; width: 5px; height: 5px; background: var(--yellow); border-radius: 50%; margin-right: 3px; vertical-align: middle; }
+
+  /* ---- CONTENT AREA ---- */
+  .content-area { flex: 1; overflow-y: auto; overflow-x: hidden; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+  .content-area::-webkit-scrollbar { width: 4px; }
+  .content-area::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+  /* ---- PAGES ---- */
+  .page { display: none; padding: 12px 14px 80px; }
+  .page.active { display: block; }
+
+  /* ---- BOTTOM NAV ---- */
+  .bottom-nav {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--bg1); border-top: 1px solid var(--border);
+    display: flex; z-index: 100;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .nav-btn {
+    flex: 1; display: flex; flex-direction: column; align-items: center;
+    padding: 10px 4px 8px; cursor: pointer; border: none; background: transparent;
+    color: var(--text3); font-family: inherit; transition: all 0.2s; gap: 3px;
+  }
+  .nav-btn .nav-icon { font-size: 1.2rem; }
+  .nav-btn .nav-label { font-size: 0.58rem; }
+  .nav-btn.active { color: var(--blue); }
+  .nav-btn.active .nav-icon { transform: translateY(-2px); }
+
+  /* ---- SHARED COMPONENTS ---- */
+  .card { background: var(--bg1); border-radius: 14px; border: 1px solid var(--border); overflow: hidden; margin-bottom: 10px; }
+  .card-header { padding: 10px 14px 0; display: flex; align-items: center; gap: 8px; }
+  .card-header h2 { font-size: 0.72rem; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; }
+  .card-body { padding: 8px 14px 12px; }
+
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 10px; }
+  .stat-card { background: var(--bg1); border-radius: 12px; border: 1px solid var(--border); padding: 10px 6px; text-align: center; }
+  .stat-val { font-size: 1.1rem; font-weight: 800; }
+  .stat-lbl { font-size: 0.56rem; color: var(--text3); margin-top: 2px; }
+
+  /* ---- TIMELINE ---- */
+  .timeline { display: flex; flex-direction: column; }
+  .tblock { display: flex; align-items: stretch; position: relative; }
+  .time-col { width: 50px; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; padding: 5px 0; }
+  .time-txt { font-size: 0.58rem; color: var(--text3); white-space: nowrap; }
+  .time-line { flex: 1; width: 1px; background: var(--border); margin: 2px 0; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; margin: 4px 0; }
+  .tblock-content { flex: 1; padding: 5px 10px 5px 5px; border-right: 2px solid transparent; margin: 2px 0; border-radius: 0 8px 8px 0; transition: background 0.15s; }
+  .tblock-icon { font-size: 0.85rem; float: right; margin-left: 5px; }
+  .tblock-title { font-size: 0.78rem; font-weight: 600; margin-bottom: 1px; }
+  .tblock-desc { font-size: 0.65rem; color: var(--text2); line-height: 1.4; }
+  .tblock-tag { display: inline-block; font-size: 0.56rem; padding: 1px 7px; border-radius: 8px; margin-top: 3px; background: var(--bg); border: 1px solid var(--border); color: var(--text2); }
+
+  .c-wake  { border-color: var(--purple); } .c-wake  .dot { background: var(--purple); } .c-wake  .tblock-title { color: #c4b5fd; }
+  .c-gym   { border-color: var(--orange); } .c-gym   .dot { background: var(--orange); } .c-gym   .tblock-title { color: #fb923c; }
+  .c-food  { border-color: var(--yellow); } .c-food  .dot { background: var(--yellow); } .c-food  .tblock-title { color: #fde047; }
+  .c-work  { border-color: var(--blue);   } .c-work  .dot { background: var(--blue);   } .c-work  .tblock-title { color: #93c5fd; }
+  .c-buf   { border-color: var(--purple); } .c-buf   .dot { background: var(--purple); } .c-buf   .tblock-title { color: #c4b5fd; }
+  .c-code  { border-color: var(--green);  } .c-code  .dot { background: var(--green);  } .c-code  .tblock-title { color: #6ee7b7; }
+  .c-free  { border-color: var(--text3);  } .c-free  .dot { background: var(--text3);  } .c-free  .tblock-title { color: var(--text2); }
+  .c-sleep { border-color: var(--blue-d); } .c-sleep .dot { background: #2d4a8a;      } .c-sleep .tblock-title { color: var(--blue); }
+
+  /* ---- HABITS ---- */
+  .habit-row { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--bg); }
+  .habit-row:last-child { border-bottom: none; }
+  .habit-check { width: 22px; height: 22px; border-radius: 6px; border: 2px solid var(--border2); background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; flex-shrink: 0; transition: all 0.2s; }
+  .habit-check.done { background: var(--green); border-color: var(--green); color: var(--bg); font-weight: 700; }
+  .habit-label { flex: 1; font-size: 0.76rem; }
+  .habit-icon { font-size: 0.85rem; }
+
+  /* ---- WEEK GRID ---- */
+  .week-row-cal { display: flex; gap: 4px; }
+  .week-day-cal { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .wdc-label { font-size: 0.56rem; color: var(--text3); }
+  .wdc-dot { width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.62rem; font-weight: 700; border: 1px solid var(--border); cursor: pointer; transition: all 0.2s; }
+  .wdc-dot.today { border-color: var(--blue) !important; color: var(--blue) !important; }
+  .wdc-dot.train-day { background: var(--green-d); color: var(--green); border-color: #2d5a3f; }
+  .wdc-dot.cardio-day { background: #2a1e1e; color: var(--red); border-color: #5a2d2d; }
+  .wdc-dot.rest-day { background: var(--bg3); color: var(--text3); }
+  .wdc-dot.done-day { background: var(--green) !important; color: var(--bg) !important; border-color: var(--green) !important; }
+  .wdc-type { font-size: 0.5rem; color: var(--text3); text-align: center; }
+
+  /* ---- WORKOUT ---- */
+  .warmup-box { background: #1a2744; border-radius: 10px; padding: 10px 12px; margin-bottom: 10px; font-size: 0.76rem; color: #93c5fd; line-height: 1.7; }
+  .warmup-box strong { color: var(--blue); }
+  .ex-row { display: flex; align-items: center; gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--bg); }
+  .ex-row:last-child { border-bottom: none; }
+  .ex-num { font-size: 0.58rem; color: var(--text3); min-width: 16px; text-align: center; }
+  .ex-name { flex: 1; font-size: 0.79rem; color: var(--text); font-weight: 500; }
+  .ex-note-sm { font-size: 0.62rem; color: var(--text3); }
+  .ex-sets { font-size: 0.68rem; background: var(--bg); border: 1px solid var(--border2); border-radius: 6px; padding: 2px 8px; color: var(--orange); white-space: nowrap; font-weight: 600; }
+  .day-type-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 14px; border-radius: 12px; font-size: 0.78rem; font-weight: 700; margin-bottom: 12px; }
+  .rest-block { text-align: center; padding: 28px 16px; }
+  .rest-block .rest-emoji { font-size: 2.5rem; margin-bottom: 8px; }
+  .rest-block h3 { font-size: 0.95rem; color: var(--purple); margin-bottom: 6px; }
+  .rest-block p { font-size: 0.74rem; color: var(--text3); line-height: 1.7; }
+
+  /* ---- NUTRITION ---- */
+  .meal-card { background: var(--bg1); border-radius: 12px; border: 1px solid var(--border); margin-bottom: 10px; overflow: hidden; }
+  .meal-header-bar { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-bottom: 1px solid var(--border); }
+  .meal-time-badge { font-size: 0.62rem; color: var(--text3); min-width: 42px; }
+  .meal-icon { font-size: 1rem; }
+  .meal-name { flex: 1; font-size: 0.86rem; font-weight: 600; }
+  .meal-kcal { font-size: 0.65rem; background: var(--bg); border: 1px solid var(--border2); border-radius: 8px; padding: 2px 8px; color: var(--green); }
+  .meal-body { padding: 8px 14px 10px; }
+  .meal-item { display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; padding: 4px 0; border-bottom: 1px solid var(--bg); }
+  .meal-item:last-child { border-bottom: none; }
+  .item-name { color: var(--text); }
+  .item-macros { font-size: 0.63rem; color: var(--text3); }
+  .macro-bar { display: flex; gap: 5px; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
+  .macro-pill { flex: 1; text-align: center; background: var(--bg); border-radius: 7px; padding: 5px 2px; }
+  .macro-pill .val { font-size: 0.8rem; font-weight: 700; }
+  .macro-pill .lbl { font-size: 0.56rem; color: var(--text3); margin-top: 1px; }
+  .p-col { color: var(--green); }
+  .c-col { color: var(--yellow); }
+  .f-col { color: var(--orange); }
+  .k-col { color: var(--purple); }
+
+  .day-type-tabs { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+  .dtype-btn { padding: 5px 12px; border-radius: 16px; border: 1px solid var(--border2); background: transparent; color: var(--text3); cursor: pointer; font-size: 0.72rem; transition: all 0.2s; font-family: inherit; }
+  .dtype-btn.active { background: var(--green-d); color: var(--green); border-color: var(--green); }
+
+  .daily-total-card { background: linear-gradient(135deg, #0f1f3d, var(--bg1)); border: 1px solid var(--blue-d); border-radius: 14px; padding: 14px; margin-top: 6px; margin-bottom: 10px; }
+  .daily-total-card h3 { font-size: 0.78rem; color: var(--blue); margin-bottom: 10px; font-weight: 700; }
+  .total-row { display: flex; gap: 7px; }
+  .total-pill { flex: 1; text-align: center; background: var(--bg); border-radius: 10px; padding: 9px 3px; }
+  .total-pill .big { font-size: 1rem; font-weight: 800; }
+  .total-pill .sm { font-size: 0.58rem; color: var(--text3); margin-top: 2px; }
+  .prog-wrap { margin-top: 10px; }
+  .prog-label { display: flex; justify-content: space-between; font-size: 0.63rem; color: var(--text3); margin-bottom: 3px; margin-top: 6px; }
+  .prog-bar-track { height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .prog-fill { height: 100%; border-radius: 3px; transition: width 0.6s; }
+
+  /* ---- SHOP ---- */
+  .shop-summary { display: flex; gap: 8px; margin-bottom: 12px; }
+  .shop-stat { flex: 1; background: var(--bg1); border-radius: 10px; padding: 8px; text-align: center; border: 1px solid var(--border); }
+  .shop-stat .sv { font-size: 0.95rem; font-weight: 700; color: var(--green); }
+  .shop-stat .sl { font-size: 0.58rem; color: var(--text3); margin-top: 1px; }
+  .shop-filter { display: flex; gap: 6px; margin-bottom: 12px; }
+  .sf-btn { flex: 1; padding: 7px 8px; border-radius: 10px; border: 1px solid var(--border2); background: transparent; color: var(--text3); cursor: pointer; font-size: 0.72rem; font-family: inherit; transition: all 0.2s; text-align: center; }
+  .sf-btn.active { border-color: var(--blue); color: var(--blue); background: var(--blue-d); }
+  .shop-cat { background: var(--bg1); border-radius: 12px; border: 1px solid var(--border); margin-bottom: 10px; overflow: hidden; }
+  .shop-cat-hdr { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--bg3); }
+  .shop-cat-hdr .icon { font-size: 1rem; }
+  .shop-cat-hdr .name { flex: 1; font-size: 0.84rem; font-weight: 700; }
+  .shop-cat-hdr .count { font-size: 0.63rem; color: var(--text3); }
+  .shop-item { display: flex; align-items: center; gap: 10px; padding: 8px 14px; border-bottom: 1px solid var(--bg); cursor: pointer; transition: background 0.15s; }
+  .shop-item:last-child { border-bottom: none; }
+  .shop-item:hover { background: var(--bg3); }
+  .shop-chk { width: 20px; height: 20px; border-radius: 5px; border: 2px solid var(--border2); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 0.68rem; color: var(--bg); font-weight: 700; transition: all 0.2s; }
+  .shop-chk.done { background: var(--green); border-color: var(--green); }
+  .shop-info { flex: 1; }
+  .shop-info .sn { font-size: 0.8rem; color: var(--text); }
+  .shop-info .ss { font-size: 0.63rem; color: var(--text3); margin-top: 1px; }
+  .shop-item.crossed .sn { text-decoration: line-through; color: var(--text3); }
+  .store-tag { display: inline-block; font-size: 0.56rem; padding: 1px 5px; border-radius: 5px; margin-right: 4px; }
+  .store-aldi { background: #1a2744; color: #60a5fa; }
+  .store-rewe { background: #2a1a1a; color: #f87171; }
+  .shop-price { font-size: 0.68rem; color: var(--text3); }
+  .shop-amount { font-size: 0.7rem; font-weight: 600; color: var(--purple); white-space: nowrap; }
+
+  .cost-box { background: linear-gradient(135deg, #0f1f3d, var(--bg1)); border: 1px solid var(--blue-d); border-radius: 14px; padding: 14px; margin-top: 4px; margin-bottom: 10px; }
+  .cost-row { display: flex; justify-content: space-between; font-size: 0.76rem; padding: 4px 0; border-bottom: 1px solid var(--border); }
+  .cost-row:last-child { border-bottom: none; }
+  .cost-row .cn { color: var(--text2); }
+  .cost-row .cv { color: var(--green); }
+  .cost-row.total .cn, .cost-row.total .cv { font-weight: 700; font-size: 0.84rem; color: var(--text); }
+
+  /* ---- TIP / NOTE ---- */
+  .tip-box { background: var(--green-d); border: 1px solid #2d5a2d; border-radius: 10px; padding: 10px 12px; font-size: 0.74rem; color: #86efac; line-height: 1.7; margin-bottom: 8px; }
+  .tip-box strong { color: var(--green); }
+  .warn-box { background: #2a1a1a; border: 1px solid #5a2d2d; border-radius: 10px; padding: 10px 12px; font-size: 0.74rem; color: #fca5a5; line-height: 1.7; margin-bottom: 8px; }
+  .warn-box strong { color: var(--red); }
+  .info-box { background: var(--blue-d); border: 1px solid #2d5a8a; border-radius: 10px; padding: 10px 12px; font-size: 0.74rem; color: #93c5fd; line-height: 1.7; margin-bottom: 8px; }
+
+  /* ---- SECTION LABEL ---- */
+  .section-label { font-size: 0.65rem; font-weight: 700; color: var(--text3); letter-spacing: 0.06em; text-transform: uppercase; padding: 8px 0 5px; }
+
+  /* ---- DIVIDER ---- */
+  .divider { height: 1px; background: var(--border); margin: 4px 0 10px; }
+
+  /* ---- PRINCIPLE ROW ---- */
+  .principle { display: flex; align-items: flex-start; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--bg); font-size: 0.76rem; line-height: 1.5; }
+  .principle:last-child { border-bottom: none; }
+  .principle .pi { font-size: 0.9rem; flex-shrink: 0; margin-top: 1px; }
+  .principle .pt { color: var(--text2); }
+  .principle .pt strong { color: var(--text); }
+
+  /* Progress done button */
+  .done-btn { width: 100%; padding: 10px; border-radius: 10px; border: 1px dashed var(--green); background: transparent; color: var(--green); cursor: pointer; font-size: 0.78rem; font-family: inherit; transition: all 0.2s; margin-top: 4px; }
+  .done-btn:hover, .done-btn.done { background: var(--green-d); }
+
+  /* Responsive */
+  @media (max-width: 380px) {
+    .stats-row { grid-template-columns: repeat(4,1fr); gap: 5px; }
+    .stat-val { font-size: 0.95rem; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-top">
+      <div class="header-title">Routine <span>Hub</span></div>
+      <div class="header-date" id="headerDate"></div>
+    </div>
+    <div class="day-strip" id="dayStrip"></div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content-area" id="contentArea">
+
+    <!-- PAGE: DASHBOARD -->
+    <div class="page active" id="page-dash">
+      <div class="stats-row" id="statsRow"></div>
+      <div class="card">
+        <div class="card-header"><h2>⏱ برنامه ساعتی امروز</h2></div>
+        <div class="card-body" style="padding-top:10px">
+          <div class="timeline" id="timeline"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h2>✅ چک‌لیست روزانه</h2></div>
+        <div class="card-body" id="habitsBody"></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h2>📅 هفته جاری</h2></div>
+        <div class="card-body" id="weekBody"></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h2>💻 بلوک کدنویسی — ۱۶:۳۰–۱۸:۳۰</h2></div>
+        <div class="card-body" id="codeBody"></div>
+      </div>
+    </div>
+
+    <!-- PAGE: WORKOUT -->
+    <div class="page" id="page-workout">
+      <div id="workoutContent"></div>
+    </div>
+
+    <!-- PAGE: NUTRITION -->
+    <div class="page" id="page-nutrition">
+      <div class="day-type-tabs" id="nutritionTabs">
+        <button class="dtype-btn active" onclick="setNutritionType('train',this)">💪 روز تمرین</button>
+        <button class="dtype-btn" onclick="setNutritionType('cardio',this)">🏃 روز کاردیو</button>
+        <button class="dtype-btn" onclick="setNutritionType('rest',this)">😴 روز استراحت</button>
+        <button class="dtype-btn" onclick="setNutritionType('office',this)">🏢 کانتین</button>
+      </div>
+      <div id="nutritionContent"></div>
+    </div>
+
+    <!-- PAGE: SHOP -->
+    <div class="page" id="page-shop">
+      <div class="shop-summary">
+        <div class="shop-stat"><div class="sv" id="shopChecked">0</div><div class="sl">تیک‌زده</div></div>
+        <div class="shop-stat"><div class="sv" id="shopTotal">0</div><div class="sl">کل اقلام</div></div>
+        <div class="shop-stat"><div class="sv">~€50</div><div class="sl">هزینه هفتگی</div></div>
+      </div>
+      <div class="shop-filter">
+        <button class="sf-btn active" onclick="setShopFilter('all',this)">🛒 همه</button>
+        <button class="sf-btn" onclick="setShopFilter('aldi',this)">🔵 Aldi/Lidl</button>
+        <button class="sf-btn" onclick="setShopFilter('rewe',this)">🔴 Rewe/Edeka</button>
+      </div>
+      <div id="shopContent"></div>
+      <div class="cost-box" id="costBox">
+        <div class="cost-row"><span class="cn">پروتئین (مرغ، ماهی، تخم‌مرغ)</span><span class="cv">~€18–22</span></div>
+        <div class="cost-row"><span class="cn">لبنیات (Quark، Skyr، Hüttenkäse)</span><span class="cv">~€8–10</span></div>
+        <div class="cost-row"><span class="cn">کربوهیدرات (جو، نان، برنج)</span><span class="cv">~€5–7</span></div>
+        <div class="cost-row"><span class="cn">میوه و سبزیجات</span><span class="cv">~€8–10</span></div>
+        <div class="cost-row total"><span class="cn">جمع کل تخمینی</span><span class="cv">~€44–56</span></div>
+      </div>
+      <button onclick="resetShop()" style="width:100%;padding:9px;border-radius:10px;border:1px solid var(--border2);background:transparent;color:var(--text3);cursor:pointer;font-size:0.74rem;font-family:inherit;margin-bottom:10px">🔄 پاک کردن لیست</button>
+    </div>
+
+  </div><!-- end content-area -->
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <button class="nav-btn active" onclick="showPage('dash',this)">
+      <span class="nav-icon">📊</span>
+      <span class="nav-label">داشبورد</span>
+    </button>
+    <button class="nav-btn" onclick="showPage('workout',this)">
+      <span class="nav-icon">💪</span>
+      <span class="nav-label">ورزش</span>
+    </button>
+    <button class="nav-btn" onclick="showPage('nutrition',this)">
+      <span class="nav-icon">🍽</span>
+      <span class="nav-label">تغذیه</span>
+    </button>
+    <button class="nav-btn" onclick="showPage('shop',this)">
+      <span class="nav-icon">🛒</span>
+      <span class="nav-label">خرید</span>
+    </button>
+  </div>
+
+</div><!-- end #app -->
+
+<script>
+// ==================== DATA ====================
+
+const DAYS = [
+  { de:'Mo', fa:'دوشنبه', type:'train', gym:'💪 سینه + سه‌سر', gymColor:'#60a5fa', gymEn:'Push Day',
+    warmup:'۵ دقیقه تردمیل آرام → ۱۵ حرکت چرخش شانه → ۳۰ تا Push-up سبک',
+    exercises:[
+      { name:'پرس سینه هالتر (Bankdrücken)', sets:'4×6–8', note:'Progressive Overload هر هفته' },
+      { name:'پرس دمبل زاویه‌دار ۳۰°', sets:'3×8–10', note:'تمرکز روی stretch بالا' },
+      { name:'فلای دمبل (Fliegende)', sets:'3×12', note:'حرکت کنترل‌شده، آهسته' },
+      { name:'پشت بازو سیمکش (Pushdown)', sets:'3×10–12', note:'آرنج ثابت' },
+      { name:'پشت بازو دمبل (Overhead)', sets:'3×12', note:'فول رنج حرکت' },
+    ]
+  },
+  { de:'Di', fa:'سه‌شنبه', type:'train', gym:'💪 پشت + دوسر', gymColor:'#34d399', gymEn:'Pull Day',
+    warmup:'۵ دقیقه تردمیل → ۱۵ تا بند کشی سبک → کشش عضلات پشت',
+    exercises:[
+      { name:'ددلیفت رومانیایی (RDL)', sets:'4×6–8', note:'پشت صاف، هیپ هینج' },
+      { name:'زیربغل سیمکش (Lat Pulldown)', sets:'4×8–10', note:'عرض دست بیشتر از شانه' },
+      { name:'قایقی دمبل (Dumbbell Row)', sets:'3×10', note:'کشش تا کمر' },
+      { name:'جلو بازو هالتر (Barbell Curl)', sets:'3×8–10', note:'آرنج کنار بدن' },
+      { name:'جلو بازو چکشی (Hammer Curl)', sets:'3×12', note:'تا فشردگی کامل' },
+    ]
+  },
+  { de:'Mi', fa:'چهارشنبه', type:'rest', gym:'❌ استراحت', gymColor:'#475569', gymEn:'Rest Day',
+    warmup:null, exercises:[]
+  },
+  { de:'Do', fa:'پنج‌شنبه', type:'train', gym:'💪 پا + شانه', gymColor:'#f97316', gymEn:'Legs & Shoulders',
+    warmup:'۵ دقیقه دوچرخه → ۲۰ تا اسکوات وزن بدن → کشش پا',
+    exercises:[
+      { name:'اسکوات هالتر (Back Squat)', sets:'4×6–8', note:'زانو نره جلوتر از پنجه' },
+      { name:'پرس پا (Leg Press)', sets:'3×10–12', note:'کامل پایین بیا' },
+      { name:'ساق پا ایستاده (Calf Raise)', sets:'4×15', note:'مکث بالا ۱ ثانیه' },
+      { name:'پرس سرشانه دمبل (OHP)', sets:'3×10', note:'کنترل فاز پایین' },
+      { name:'نشر جانب دمبل (Lateral Raise)', sets:'3×12–15', note:'آرنج کمی خم' },
+    ]
+  },
+  { de:'Fr', fa:'جمعه', type:'cardio', gym:'🏃 HIIT + Core', gymColor:'#f87171', gymEn:'Cardio & Core',
+    warmup:'۵ دقیقه راه رفتن → کشش پویا → ضربان قلب بالا بیا',
+    exercises:[
+      { name:'HIIT تردمیل — ۸ راند', sets:'۴۰ ثانیه دویدن / ۲۰ ثانیه استراحت', note:'مجموع ۱۶ دقیقه' },
+      { name:'پلانک (Plank)', sets:'3×max', note:'هیپ نیفتد' },
+      { name:'کرانچ دوچرخه (Bicycle Crunch)', sets:'3×20', note:'آرام و کنترل‌شده' },
+      { name:'Mountain Climbers', sets:'3×30 ثانیه', note:'سریع ولی فرم درست' },
+    ]
+  },
+  { de:'Sa', fa:'شنبه', type:'rest-full', gym:'💪 تمرین کامل', gymColor:'#a78bfa', gymEn:'Full Body (no rush)',
+    warmup:'گرم‌کردن کامل ۱۰ دقیقه — وقت داری!',
+    exercises:[
+      { name:'ددلیفت (Deadlift)', sets:'4×5', note:'سنگین‌ترین روز هفته' },
+      { name:'پرس سینه', sets:'3×8', note:'وزن خوب' },
+      { name:'اسکوات', sets:'3×8', note:'فول رنج' },
+      { name:'زیربغل دمبل', sets:'3×10', note:'—' },
+      { name:'پرس سرشانه', sets:'3×10', note:'—' },
+      { name:'جلو بازو + پشت بازو', sets:'3×12 هر کدام', note:'سوپرست' },
+    ]
+  },
+  { de:'So', fa:'یکشنبه', type:'rest', gym:'🚶 استراحت فعال', gymColor:'#475569', gymEn:'Active Rest',
+    warmup:null, exercises:[]
+  },
+];
+
+const MEALS = {
+  train: [
+    { time:'05:15', icon:'⚡', name:'پیش‌وعده ورزش', kcal:'~220', cls:'pre', items:[
+      { name:'🍌 موز بزرگ (150g)', macros:'35g کربو · 1.5g پروتئین' },
+      { name:'🥜 کره بادام‌زمینی طبیعی (1.5 ق)', macros:'6g پروتئین · 12g چربی' },
+    ], macros:{ p:'7g', c:'38g', f:'12g', k:'220' }},
+    { time:'07:00', icon:'🍳', name:'صبحانه Post-Workout', kcal:'~750', cls:'post', items:[
+      { name:'🥚 تخم‌مرغ کامل (3 عدد)', macros:'18g پروتئین · 15g چربی' },
+      { name:'🥚 سفیده اضافه (2 عدد)', macros:'7g پروتئین · 0g چربی' },
+      { name:'🌾 Haferflocken 100g (خشک)', macros:'13g پروتئین · 60g کربو' },
+      { name:'🍌 موز (نصف) + 🥛 Skyr 200g', macros:'20g پروتئین · 13g کربو' },
+      { name:'🍯 عسل (1 ق.چ)', macros:'8g کربو · 30 kcal' },
+    ], macros:{ p:'58g', c:'93g', f:'15g', k:'750' }},
+    { time:'10:30', icon:'🥜', name:'میان‌وعده سر کار', kcal:'~350', cls:'snack', items:[
+      { name:'🧀 Hüttenkäse 250g', macros:'28g پروتئین · 5g چربی' },
+      { name:'🍞 Vollkornbrot 2 تکه', macros:'8g پروتئین · 36g کربو' },
+      { name:'🥒 خیار یا گوجه', macros:'کالری ناچیز' },
+    ], macros:{ p:'36g', c:'40g', f:'5g', k:'350' }},
+    { time:'12:30', icon:'🥗', name:'ناهار — Meal Prep', kcal:'~620', cls:'lunch', items:[
+      { name:'🍗 سینه مرغ 200g (پخته)', macros:'46g پروتئین · 3g چربی' },
+      { name:'🍚 برنج قهوه‌ای 150g (پخته)', macros:'4g پروتئین · 45g کربو' },
+      { name:'🥦 بروکلی / سبزی بخارپز 150g', macros:'4g پروتئین · 8g کربو' },
+      { name:'🍄 قارچ تفت‌داده 100g', macros:'3g پروتئین · 4g کربو' },
+      { name:'🫒 روغن زیتون (1 ق.غ)', macros:'14g چربی · 120 kcal' },
+    ], macros:{ p:'57g', c:'57g', f:'17g', k:'620' }},
+    { time:'15:30', icon:'🍎', name:'میان‌وعده بعدازظهر', kcal:'~300', cls:'snack', items:[
+      { name:'🥛 Skyr یا ماست یونانی 200g', macros:'20g پروتئین · 12g کربو' },
+      { name:'🫐 بلوبری 100g', macros:'1g پروتئین · 14g کربو' },
+      { name:'🥜 آجیل مخلوط 30g', macros:'5g پروتئین · 15g چربی' },
+    ], macros:{ p:'26g', c:'26g', f:'15g', k:'300' }},
+    { time:'18:30', icon:'🍽', name:'شام', kcal:'~630', cls:'dinner', items:[
+      { name:'🐟 Räucherlachs 150g', macros:'32g پروتئین · 15g چربی' },
+      { name:'🥔 سیب‌زمینی آب‌پز 250g', macros:'5g پروتئین · 45g کربو' },
+      { name:'🥗 سالاد سبزیجات بزرگ', macros:'3g پروتئین · 10g کربو' },
+      { name:'🫒 روغن زیتون + آب‌لیمو', macros:'10g چربی · 90 kcal' },
+    ], macros:{ p:'40g', c:'55g', f:'25g', k:'630' }},
+    { time:'21:30', icon:'🌙', name:'Quark قبل خواب', kcal:'~200', cls:'night', items:[
+      { name:'🫙 Quark 250g', macros:'28g پروتئین · 5g کربو' },
+      { name:'🍯 عسل (1 ق.چ) + 🫐 کمی بلوبری', macros:'15g کربو · 60 kcal' },
+    ], macros:{ p:'28g', c:'20g', f:'2g', k:'200' }},
+  ],
+  cardio: [
+    { time:'06:45', icon:'🥣', name:'صبحانه (بعد کاردیو سبک)', kcal:'~555', cls:'post', items:[
+      { name:'🥚 تخم‌مرغ کامل (3 عدد)', macros:'18g پروتئین · 15g چربی' },
+      { name:'🌾 Haferflocken 80g', macros:'10g پروتئین · 48g کربو' },
+      { name:'🍌 موز', macros:'1g پروتئین · 27g کربو' },
+    ], macros:{ p:'29g', c:'75g', f:'15g', k:'555' }},
+    { time:'10:30', icon:'🥜', name:'میان‌وعده', kcal:'~230', cls:'snack', items:[
+      { name:'🧀 Hüttenkäse 200g', macros:'22g پروتئین' },
+      { name:'🍎 سیب یا میوه فصل', macros:'20g کربو' },
+    ], macros:{ p:'23g', c:'25g', f:'4g', k:'230' }},
+    { time:'12:30', icon:'🥗', name:'ناهار — کمی کربو کمتر', kcal:'~460', cls:'lunch', items:[
+      { name:'🍗 سینه مرغ 200g', macros:'46g پروتئین' },
+      { name:'🥔 سیب‌زمینی کوچک 150g', macros:'27g کربو' },
+      { name:'🍄 قارچ + سبزیجات بخارپز', macros:'10g کربو' },
+    ], macros:{ p:'50g', c:'40g', f:'10g', k:'460' }},
+    { time:'18:30', icon:'🍽', name:'شام', kcal:'~540', cls:'dinner', items:[
+      { name:'🐟 Räucherlachs 150g', macros:'32g پروتئین · 15g چربی' },
+      { name:'🥗 سالاد بزرگ با آووکادو', macros:'5g پروتئین · 15g چربی' },
+      { name:'🍞 Vollkornbrot 1 تکه', macros:'4g پروتئین · 18g کربو' },
+    ], macros:{ p:'41g', c:'25g', f:'30g', k:'540' }},
+    { time:'21:30', icon:'🌙', name:'Quark قبل خواب', kcal:'~160', cls:'night', items:[
+      { name:'🫙 Quark 250g + عسل', macros:'28g پروتئین · 13g کربو' },
+    ], macros:{ p:'28g', c:'13g', f:'1g', k:'160' }},
+  ],
+  rest: [
+    { time:'08:00', icon:'🥞', name:'صبحانه آرام (بدون عجله)', kcal:'~580', cls:'post', items:[
+      { name:'🥚 تخم‌مرغ (4 عدد) + قارچ', macros:'28g پروتئین' },
+      { name:'🍞 Vollkornbrot 2 تکه', macros:'8g پروتئین · 36g کربو' },
+      { name:'🧀 Hüttenkäse 100g', macros:'11g پروتئین' },
+    ], macros:{ p:'51g', c:'45g', f:'20g', k:'580' }},
+    { time:'13:00', icon:'🍳', name:'ناهار — Meal Prep شنبه', kcal:'~530', cls:'lunch', items:[
+      { name:'🍗 مرغ 200g + قارچ تفت‌داده', macros:'49g پروتئین' },
+      { name:'🥦 سبزیجات بخارپز 200g', macros:'8g پروتئین · 15g کربو' },
+      { name:'🍚 برنج قهوه‌ای 100g', macros:'2g پروتئین · 28g کربو' },
+    ], macros:{ p:'59g', c:'45g', f:'12g', k:'530' }},
+    { time:'18:30', icon:'🍽', name:'شام', kcal:'~590', cls:'dinner', items:[
+      { name:'🐟 ماهی تازه یا Räucherlachs 200g', macros:'42g پروتئین' },
+      { name:'🥗 سالاد بزرگ + آووکادو', macros:'20g چربی سالم' },
+      { name:'🍠 سیب‌زمینی شیرین 150g', macros:'30g کربو' },
+    ], macros:{ p:'45g', c:'38g', f:'28g', k:'590' }},
+    { time:'21:30', icon:'🌙', name:'Quark قبل خواب', kcal:'~165', cls:'night', items:[
+      { name:'🫙 Quark 250g + عسل + دارچین', macros:'28g پروتئین' },
+    ], macros:{ p:'28g', c:'13g', f:'1g', k:'165' }},
+  ],
+  office: [
+    { time:'12:00', icon:'🍽', name:'کانتین — انتخاب درست', kcal:'600–800', cls:'lunch', items:[
+      { name:'✅ مرغ / ماهی + سبزیجات', macros:'بهترین انتخاب' },
+      { name:'✅ سالاد بزرگ + پروتئین', macros:'اگه گرسنگی کمه' },
+      { name:'✅ ماکارونی با مرغ (بدون خامه)', macros:'کربو + پروتئین' },
+      { name:'⚠️ غذاهای سرخ‌شده', macros:'اگه گزینه دیگه نیست' },
+      { name:'❌ پیتزا / فست‌فود', macros:'چربی بد — پروتئین کم' },
+    ], macros:null},
+  ]
+};
+
+const TOTALS = {
+  train:  { p:'252g', c:'329g', f:'91g', k:'3150', pPct:100, kPct:96 },
+  cardio: { p:'171g', c:'178g', f:'60g', k:'1945', pPct:100, kPct:62 },
+  rest:   { p:'183g', c:'141g', f:'61g', k:'1865', pPct:100, kPct:59 },
+  office: null,
+};
+
+const TIMELINE = {
+  train: [
+    { time:'05:15', cls:'c-food',  icon:'⚡', title:'پیش‌وعده ورزش', desc:'موز + کره بادام‌زمینی', tag:null },
+    { time:'06:00', cls:'c-gym',   icon:'🏋️', title:'باشگاه — ۴۵–۵۵ دق', desc:'گرم‌کردن ۸ دقیقه الزامی', tag:'صبح بدن سرده!' },
+    { time:'07:00', cls:'c-food',  icon:'🍳', title:'صبحانه Post-Workout', desc:'تخم‌مرغ + جو دوسر + Skyr', tag:null },
+    { time:'08:00', cls:'c-work',  icon:'💼', title:'Deep Work — کار شرکت', desc:'سنگین‌ترین تسک‌ها. Pomodoro 50+10', tag:'موبایل ساکت' },
+    { time:'10:30', cls:'c-food',  icon:'🥜', title:'میان‌وعده', desc:'Hüttenkäse + Vollkornbrot', tag:null },
+    { time:'12:30', cls:'c-food',  icon:'🥗', title:'ناهار + پیاده‌روی', desc:'۱۰ دق پیاده‌روی فراموش نشه', tag:null },
+    { time:'15:30', cls:'c-food',  icon:'🍎', title:'میان‌وعده ۲', desc:'Skyr + بلوبری + آجیل', tag:null },
+    { time:'16:00', cls:'c-buf',   icon:'☕', title:'بافر ذهنی', desc:'قهوه، هوا — بدون کد!', tag:'shift از کارمند به سازنده' },
+    { time:'16:30', cls:'c-code',  icon:'💻', title:'توسعه وب‌اپ — ۲ ساعت', desc:'یه تسک مشخص. Commit بدون استثنا.', tag:'یه feature کوچیک' },
+    { time:'18:30', cls:'c-food',  icon:'🍽', title:'شام', desc:'Räucherlachs + سیب‌زمینی + سالاد', tag:null },
+    { time:'19:00', cls:'c-free',  icon:'🧘', title:'زمان آزاد', desc:'پادکست، کتاب، خانواده', tag:null },
+    { time:'21:30', cls:'c-food',  icon:'🌙', title:'Quark قبل خواب', desc:'Quark + عسل + دارچین', tag:null },
+    { time:'22:00', cls:'c-sleep', icon:'😴', title:'خواب — ۷.۵ ساعت', desc:'صفحه نمایش خاموش. غیرقابل معامله.', tag:null },
+  ],
+  cardio: [
+    { time:'06:00', cls:'c-gym',   icon:'🏃', title:'HIIT + Core', desc:'گرم‌کردن پویا ۵ دقیقه', tag:'ضربان قلب رو بالا بیار' },
+    { time:'07:00', cls:'c-food',  icon:'🥣', title:'صبحانه', desc:'تخم‌مرغ + جو دوسر + موز', tag:null },
+    { time:'08:00', cls:'c-work',  icon:'💼', title:'Deep Work — کار شرکت', desc:'سنگین‌ترین تسک‌ها', tag:'Pomodoro 50+10' },
+    { time:'10:30', cls:'c-food',  icon:'🥜', title:'میان‌وعده', desc:'Hüttenkäse + سیب', tag:null },
+    { time:'12:30', cls:'c-food',  icon:'🥗', title:'ناهار + پیاده‌روی', desc:'کمی کربو کمتر امروز', tag:null },
+    { time:'16:00', cls:'c-buf',   icon:'☕', title:'بافر ذهنی', desc:'قهوه، هوا خوردن', tag:null },
+    { time:'16:30', cls:'c-code',  icon:'💻', title:'توسعه وب‌اپ — ۲ ساعت', desc:'یه تسک مشخص. Commit!', tag:null },
+    { time:'18:30', cls:'c-food',  icon:'🍽', title:'شام', desc:'Räucherlachs + سالاد + نان', tag:null },
+    { time:'19:00', cls:'c-free',  icon:'🧘', title:'زمان آزاد', desc:'پادکست، کتاب، دوستان', tag:null },
+    { time:'21:30', cls:'c-food',  icon:'🌙', title:'Quark', desc:'Quark + عسل', tag:null },
+    { time:'22:00', cls:'c-sleep', icon:'😴', title:'خواب', desc:'۷.۵ ساعت', tag:null },
+  ],
+  rest: [
+    { time:'08:00', cls:'c-wake',  icon:'☀️', title:'بیدار شدن آزاد', desc:'بدون زنگ ساعت', tag:null },
+    { time:'09:00', cls:'c-food',  icon:'🥞', title:'صبحانه + Meal Prep', desc:'آماده‌سازی غذای هفته', tag:'شنبه = خرید + Meal Prep' },
+    { time:'13:00', cls:'c-food',  icon:'🍳', title:'ناهار', desc:'مرغ + قارچ + سبزیجات + برنج', tag:null },
+    { time:'15:00', cls:'c-free',  icon:'🚶', title:'پیاده‌روی / طبیعت', desc:'۳۰–۴۵ دقیقه — ریکاوری فعال', tag:null },
+    { time:'18:30', cls:'c-food',  icon:'🍽', title:'شام', desc:'ماهی تازه + سالاد', tag:null },
+    { time:'19:00', cls:'c-free',  icon:'🧘', title:'زمان آزاد کامل', desc:'خانواده، دوستان، سرگرمی', tag:null },
+    { time:'21:30', cls:'c-food',  icon:'🌙', title:'Quark', desc:'Quark + عسل + دارچین', tag:null },
+    { time:'22:00', cls:'c-sleep', icon:'😴', title:'خواب', desc:'۷.۵ ساعت', tag:null },
+  ],
+};
+
+const HABITS = [
+  { icon:'🏋️', label:'ورزش / کاردیو' },
+  { icon:'💻', label:'کدنویسی وب‌اپ (۲ ساعت)' },
+  { icon:'💧', label:'۳ لیتر آب' },
+  { icon:'🥗', label:'تغذیه مطابق برنامه' },
+  { icon:'🌙', label:'خواب قبل ۲۲:۳۰' },
+  { icon:'🚶', label:'پیاده‌روی بعد ناهار' },
+  { icon:'📵', label:'بدون موبایل ۳۰ دق صبح' },
+  { icon:'🫙', label:'Quark قبل خواب' },
+];
+
+const SHOP_CATS = [
+  { name:'پروتئین اصلی', icon:'🍗', items:[
+    { name:'سینه مرغ', sub:'Hähnchenbrustfilet', amount:'1.5 کیلو', price:'~€9', store:'aldi' },
+    { name:'Räucherlachs — ماهی دودی', sub:'برش ۱۰۰–۱۵۰g', amount:'400g', price:'~€5', store:'rewe' },
+    { name:'ماهی تازه یا فریزری', sub:'Lachs / Forelle', amount:'400g', price:'~€5', store:'rewe' },
+    { name:'تخم‌مرغ', sub:'Eier M یا L', amount:'18 عدد', price:'~€3.5', store:'aldi' },
+  ]},
+  { name:'لبنیات پروتئینی', icon:'🥛', items:[
+    { name:'Quark (Magerquark)', sub:'کازئین شبانه', amount:'3 × 500g', price:'~€3', store:'aldi' },
+    { name:'Skyr یا ماست یونانی', sub:'Griechischer Joghurt', amount:'4 × 200g', price:'~€4', store:'aldi' },
+    { name:'Hüttenkäse', sub:'پنیر کم‌چرب — میان‌وعده', amount:'2 × 200g', price:'~€2.5', store:'aldi' },
+    { name:'شیر کم‌چرب', sub:'Fettarme Milch 1.5%', amount:'1 لیتر', price:'~€1', store:'aldi' },
+  ]},
+  { name:'کربوهیدرات', icon:'🌾', items:[
+    { name:'Haferflocken (جو دوسر)', sub:'Kernige یا zarte', amount:'1 کیلو', price:'~€1.5', store:'aldi' },
+    { name:'Vollkornbrot (نان سبوس‌دار)', sub:'میان‌وعده و شام', amount:'1 قرص', price:'~€2.5', store:'rewe' },
+    { name:'برنج قهوه‌ای', sub:'Naturreis — Meal Prep', amount:'500g', price:'~€1.5', store:'aldi' },
+    { name:'سیب‌زمینی', sub:'Kartoffeln — شام', amount:'1.5 کیلو', price:'~€2', store:'aldi' },
+    { name:'سیب‌زمینی شیرین', sub:'Süßkartoffeln', amount:'500g', price:'~€2', store:'rewe' },
+  ]},
+  { name:'میوه', icon:'🍌', items:[
+    { name:'موز', sub:'Bananen — پیش‌وعده', amount:'8–10 عدد', price:'~€2', store:'aldi' },
+    { name:'بلوبری', sub:'Blaubeeren — با Quark', amount:'250g', price:'~€2.5', store:'aldi' },
+    { name:'توت‌فرنگی', sub:'Erdbeeren', amount:'250g', price:'~€2', store:'aldi' },
+    { name:'سیب', sub:'Äpfel — میان‌وعده', amount:'4 عدد', price:'~€1.5', store:'aldi' },
+  ]},
+  { name:'سبزیجات', icon:'🥦', items:[
+    { name:'قارچ', sub:'Champignons', amount:'500g', price:'~€2', store:'rewe' },
+    { name:'بروکلی', sub:'Brokkoli تازه یا فریزری', amount:'500g', price:'~€1.5', store:'aldi' },
+    { name:'اسفناج فریزری', sub:'Tiefkühl Spinat', amount:'450g', price:'~€1.5', store:'aldi' },
+    { name:'گوجه‌فرنگی + خیار', sub:'Tomaten / Gurke', amount:'500g + 2 عدد', price:'~€2.5', store:'rewe' },
+    { name:'آووکادو', sub:'چربی سالم — شام', amount:'2 عدد', price:'~€2', store:'rewe' },
+  ]},
+  { name:'چربی‌های سالم', icon:'🥜', items:[
+    { name:'کره بادام‌زمینی طبیعی', sub:'Erdnussmus (بدون شکر)', amount:'500g', price:'~€3', store:'aldi' },
+    { name:'آجیل مخلوط بدون نمک', sub:'Nussmischung', amount:'200g', price:'~€3', store:'aldi' },
+    { name:'روغن زیتون', sub:'Olivenöl', amount:'500ml', price:'~€3.5', store:'aldi' },
+  ]},
+  { name:'متفرقه', icon:'🍯', items:[
+    { name:'عسل طبیعی', sub:'Honig', amount:'250g', price:'~€2.5', store:'aldi' },
+    { name:'دارچین', sub:'Zimt', amount:'1 بسته', price:'~€1', store:'aldi' },
+    { name:'خرما', sub:'Datteln — پیش‌وعده ورزشی', amount:'200g', price:'~€2.5', store:'aldi' },
+    { name:'آب معدنی', sub:'Mineralwasser', amount:'6 × 1.5L', price:'~€3', store:'aldi' },
+  ]},
+];
+
+// ==================== STATE ====================
+const jsDay = new Date().getDay();
+const todayIdx = jsDay === 0 ? 6 : jsDay - 1;
+let currentDay = todayIdx;
+const habitState = {};
+const dayDoneState = {};
+let nutritionType = 'train';
+let shopFilter = 'all';
+const shopState = {};
+
+// ==================== UTILS ====================
+function getDayType(day) {
+  if (day.type === 'rest' || day.type === 'rest-full') return 'rest';
+  return day.type;
+}
+
+function getTimelineType(day) {
+  const t = day.type;
+  if (t === 'rest' || t === 'rest-full') return 'rest';
+  if (t === 'cardio') return 'cardio';
+  return 'train';
+}
+
+// ==================== HEADER ====================
+function renderHeader() {
+  const now = new Date();
+  const opts = { weekday:'short', day:'numeric', month:'short' };
+  document.getElementById('headerDate').textContent = now.toLocaleDateString('de-DE', opts);
+
+  const strip = document.getElementById('dayStrip');
+  strip.innerHTML = '';
+  DAYS.forEach((d, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'day-btn' + (i === currentDay ? ' active' : '');
+    const isToday = i === todayIdx;
+    btn.innerHTML = (isToday ? '<span class="today-dot"></span>' : '') + `${d.de} <span style="opacity:0.55;font-size:0.62rem">${d.fa}</span>`;
+    btn.onclick = () => { currentDay = i; renderAll(); };
+    strip.appendChild(btn);
+  });
+}
+
+// ==================== DASHBOARD ====================
+function renderStats() {
+  const day = DAYS[currentDay];
+  const type = getDayType(day);
+  const isRest = type === 'rest';
+  const workH = isRest ? 0 : 8;
+  const codeH = isRest ? 0 : 2;
+  const gymM = isRest ? 0 : (day.type === 'cardio' ? 30 : 55);
+  document.getElementById('statsRow').innerHTML = `
+    <div class="stat-card"><div class="stat-val" style="color:var(--blue)">${workH}h</div><div class="stat-lbl">کار شرکت</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--green)">${codeH}h</div><div class="stat-lbl">وب‌اپ</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--orange)">${gymM}m</div><div class="stat-lbl">ورزش</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--purple)">7.5h</div><div class="stat-lbl">خواب</div></div>
+  `;
+}
+
+function renderTimeline() {
+  const day = DAYS[currentDay];
+  const type = getTimelineType(day);
+  const blocks = TIMELINE[type] || TIMELINE.rest;
+  const el = document.getElementById('timeline');
+  el.innerHTML = blocks.map(b => `
+    <div class="tblock">
+      <div class="time-col">
+        <div class="time-txt">${b.time}</div>
+        <div class="time-line"></div>
+      </div>
+      <div class="tblock-content ${b.cls}">
+        <span class="tblock-icon">${b.icon}</span>
+        <div class="tblock-title">${b.title}</div>
+        <div class="tblock-desc">${b.desc}</div>
+        ${b.tag ? `<div class="tblock-tag">${b.tag}</div>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderHabits() {
+  const el = document.getElementById('habitsBody');
+  const rows = HABITS.map((h, hi) => {
+    const key = `${currentDay}-${hi}`;
+    const done = habitState[key];
+    return `<div class="habit-row">
+      <div class="habit-check ${done ? 'done' : ''}" onclick="toggleHabit(${currentDay},${hi})">${done ? '✓' : ''}</div>
+      <span class="habit-icon">${h.icon}</span>
+      <span class="habit-label" style="${done ? 'text-decoration:line-through;color:var(--text3)' : ''}">${h.label}</span>
+    </div>`;
+  }).join('');
+  const doneCount = HABITS.filter((_, hi) => habitState[`${currentDay}-${hi}`]).length;
+  const pct = Math.round(doneCount / HABITS.length * 100);
+  el.innerHTML = rows + `
+    <div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border)">
+      <div class="prog-label"><span>پیشرفت امروز</span><span style="color:var(--green)">${doneCount}/${HABITS.length} — ${pct}%</span></div>
+      <div class="prog-bar-track"><div class="prog-fill" style="width:${pct}%;background:var(--green)"></div></div>
+    </div>
+  `;
+}
+
+function renderWeek() {
+  const icons = ['💪','💪','❌','💪','🏃','💪','🚶'];
+  const typeLabels = ['Push','Pull','Rest','Legs','HIIT','Full','Walk'];
+  const typeCls = ['train-day','train-day','rest-day','train-day','cardio-day','train-day','rest-day'];
+  const dots = DAYS.map((d, i) => {
+    const isToday = i === todayIdx;
+    const isDone = dayDoneState[i];
+    let cls = typeCls[i];
+    if (isDone) cls = 'done-day';
+    const todayCls = isToday && !isDone ? ' today' : '';
+    return `<div class="week-day-cal">
+      <div class="wdc-label">${d.de}</div>
+      <div class="wdc-dot ${cls}${todayCls}" onclick="toggleDayDone(${i})">${isDone ? '✓' : icons[i]}</div>
+      <div class="wdc-type">${typeLabels[i]}</div>
+    </div>`;
+  }).join('');
+  const doneDays = Object.values(dayDoneState).filter(Boolean).length;
+  document.getElementById('weekBody').innerHTML = `
+    <div class="week-row-cal">${dots}</div>
+    <div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border)">
+      <div class="prog-label"><span>روزهای انجام‌شده این هفته</span><span style="color:var(--green)">${doneDays}/7</span></div>
+      <div class="prog-bar-track"><div class="prog-fill" style="width:${doneDays/7*100}%;background:var(--green)"></div></div>
+    </div>
+  `;
+}
+
+function renderCodeBlock() {
+  const day = DAYS[currentDay];
+  const isRest = day.type === 'rest';
+  const el = document.getElementById('codeBody');
+  if (isRest) {
+    el.innerHTML = `<div style="text-align:center;padding:12px 0;color:var(--text3);font-size:0.8rem">امروز کدنویسی نداری — برنامه فردا رو بنویس 📝</div>`;
+    return;
+  }
+  el.innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:10px">
+      <div class="ex-row"><span class="meal-time-badge" style="font-size:0.62rem;color:var(--text3);min-width:44px">16:00</span><span style="font-size:0.76rem;color:var(--text2)">بافر ذهنی — قهوه، هوا (بدون کد!)</span></div>
+      <div class="ex-row"><span class="meal-time-badge" style="font-size:0.62rem;color:var(--text3);min-width:44px">16:30</span><span style="font-size:0.76rem;color:var(--text)"><strong>شروع کد</strong> — تسک مشخص از دیروز</span></div>
+      <div class="ex-row"><span class="meal-time-badge" style="font-size:0.62rem;color:var(--text3);min-width:44px">17:50</span><span style="font-size:0.76rem;color:var(--text2)">تست + مستندات</span></div>
+      <div class="ex-row"><span class="meal-time-badge" style="font-size:0.62rem;color:var(--text3);min-width:44px">18:25</span><span style="font-size:0.76rem;color:var(--green)"><strong>Commit</strong> + تعیین تسک فردا</span></div>
+    </div>
+    <div class="info-box">⚡ <strong>قانون:</strong> هر روز فقط یه چیز مشخص بساز — هیچ‌وقت بدون commit ببند!</div>
+  `;
+}
+
+// ==================== WORKOUT ====================
+function renderWorkout() {
+  const day = DAYS[currentDay];
+  const el = document.getElementById('workoutContent');
+  const type = day.type;
+
+  if (type === 'rest') {
+    el.innerHTML = `
+      <div class="rest-block">
+        <div class="rest-emoji">😴</div>
+        <h3>روز استراحت کامل</h3>
+        <p>عضله در زمان استراحت می‌سازه.<br>یه پیاده‌روی ۳۰–۴۵ دقیقه‌ای کافیه.<br>بدن رو برای فردا آماده کن.</p>
+      </div>
+      <div class="tip-box">💡 <strong>Progressive Overload:</strong> هر ۶–۸ هفته یه هفته Deload داری. ۲.۵–۵ کیلو یا ۱–۲ تکرار بیشتر هر هفته کافیه.</div>
+      <div class="tip-box">🚶 <strong>استراحت فعال:</strong> راه رفتن، دوچرخه آرام، یوگا — گردش خون کمک می‌کنه به ریکاوری.</div>
+    `;
+    return;
+  }
+
+  const isCardio = type === 'cardio';
+  const badgeColor = isCardio ? '#f87171' : (type === 'rest-full' ? '#a78bfa' : '#34d399');
+  const bgColor = isCardio ? '#2a1e1e' : (type === 'rest-full' ? '#2d1e4a' : '#1e3a2f');
+
+  let html = `
+    <div class="day-type-badge" style="background:${bgColor};color:${badgeColor};border:1px solid ${badgeColor}33">
+      ${day.gym} — ${day.gymEn}
+    </div>
+  `;
+
+  if (day.warmup) {
+    html += `<div class="warmup-box">🔥 <strong>گرم‌کردن (۸–۱۰ دقیقه):</strong> ${day.warmup}</div>`;
+  }
+
+  if (day.exercises.length > 0) {
+    html += `<div class="card"><div class="card-header"><h2>📋 تمرینات</h2></div><div class="card-body">`;
+    html += day.exercises.map((ex, i) => `
+      <div class="ex-row">
+        <span class="ex-num">${i+1}</span>
+        <div style="flex:1">
+          <div class="ex-name">${ex.name}</div>
+          ${ex.note ? `<div class="ex-note-sm">${ex.note}</div>` : ''}
+        </div>
+        <span class="ex-sets">${ex.sets}</span>
+      </div>
+    `).join('');
+    html += `</div></div>`;
+  }
+
+  html += `
+    <div class="card">
+      <div class="card-header"><h2>📐 اصول مهم</h2></div>
+      <div class="card-body">
+        <div class="principle"><span class="pi">🔥</span><span class="pt"><strong>گرم‌کردن:</strong> ۸–۱۰ دقیقه اجباری — صبح بدن سرده</span></div>
+        <div class="principle"><span class="pi">📈</span><span class="pt"><strong>Progressive Overload:</strong> ۲.۵–۵ کیلو یا ۱–۲ تکرار بیشتر هر هفته</span></div>
+        <div class="principle"><span class="pi">⏱</span><span class="pt"><strong>استراحت بین ست:</strong> ۹۰–۱۲۰ ثانیه برای حرکات سنگین</span></div>
+        <div class="principle"><span class="pi">🥤</span><span class="pt"><strong>آب:</strong> ۳–۳.۵ لیتر در روز تمرین</span></div>
+        <div class="principle"><span class="pi">🍌</span><span class="pt"><strong>پیش‌وعده:</strong> ۰۵:۱۵ موز + کره بادام‌زمینی برای انرژی کافی</span></div>
+        <div class="principle"><span class="pi">🔄</span><span class="pt"><strong>Deload:</strong> هر ۶–۸ هفته یه هفته با ۶۰٪ وزن</span></div>
+      </div>
+    </div>
+    <button class="done-btn ${dayDoneState[currentDay] ? 'done' : ''}" onclick="toggleDayDone(${currentDay});renderAll()">
+      ${dayDoneState[currentDay] ? '✅ تمرین امروز انجام شد!' : '○ تمرین امروز رو تیک بزن'}
+    </button>
+  `;
+
+  el.innerHTML = html;
+}
+
+// ==================== NUTRITION ====================
+function setNutritionType(type, btn) {
+  nutritionType = type;
+  document.querySelectorAll('.dtype-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderNutrition();
+}
+
+function renderNutrition() {
+  const meals = MEALS[nutritionType] || MEALS.train;
+  const totals = TOTALS[nutritionType];
+  const el = document.getElementById('nutritionContent');
+
+  let html = meals.map(m => {
+    const items = m.items.map(item => `
+      <div class="meal-item">
+        <span class="item-name">${item.name}</span>
+        <span class="item-macros">${item.macros}</span>
+      </div>
+    `).join('');
+    const macroBar = m.macros ? `
+      <div class="macro-bar">
+        <div class="macro-pill"><div class="val p-col">${m.macros.p}</div><div class="lbl">پروتئین</div></div>
+        <div class="macro-pill"><div class="val c-col">${m.macros.c}</div><div class="lbl">کربو</div></div>
+        <div class="macro-pill"><div class="val f-col">${m.macros.f}</div><div class="lbl">چربی</div></div>
+        <div class="macro-pill"><div class="val k-col">${m.macros.k}</div><div class="lbl">kcal</div></div>
+      </div>` : '';
+    return `
+      <div class="meal-card">
+        <div class="meal-header-bar">
+          <span class="meal-time-badge">${m.time}</span>
+          <span class="meal-icon">${m.icon}</span>
+          <span class="meal-name">${m.name}</span>
+          <span class="meal-kcal">${m.kcal} kcal</span>
+        </div>
+        <div class="meal-body">${items}${macroBar}</div>
+      </div>
+    `;
+  }).join('');
+
+  if (totals) {
+    html += `
+      <div class="daily-total-card">
+        <h3>📊 جمع روز ${nutritionType === 'train' ? 'تمرین' : nutritionType === 'cardio' ? 'کاردیو' : 'استراحت'}</h3>
+        <div class="total-row">
+          <div class="total-pill"><div class="big p-col">${totals.p}</div><div class="sm">پروتئین ✅</div></div>
+          <div class="total-pill"><div class="big c-col">${totals.c}</div><div class="sm">کربو</div></div>
+          <div class="total-pill"><div class="big f-col">${totals.f}</div><div class="sm">چربی</div></div>
+          <div class="total-pill"><div class="big k-col">${totals.k}</div><div class="sm">kcal ✅</div></div>
+        </div>
+        <div class="prog-wrap">
+          <div class="prog-label"><span>پروتئین (هدف: ۱۷۰g+)</span><span class="p-col">${totals.p} ✅</span></div>
+          <div class="prog-bar-track"><div class="prog-fill" style="width:${totals.pPct}%;background:var(--green)"></div></div>
+          <div class="prog-label"><span>کالری (هدف روز تمرین: ۳۱۰۰–۳۳۰۰)</span><span class="k-col">${totals.k} kcal</span></div>
+          <div class="prog-bar-track"><div class="prog-fill" style="width:${totals.kPct}%;background:var(--purple)"></div></div>
+        </div>
+      </div>
+    `;
+  }
+
+  if (nutritionType === 'office') {
+    html += `<div class="warn-box">⚠️ <strong>نکته کانتین:</strong> سس‌ها کالری مخفی زیاد دارن. سس رو کم بخواه. اگه پورسیون کوچیکه، یه Hüttenkäse از خونه بیار.</div>`;
+  }
+
+  html += `
+    <div class="card">
+      <div class="card-header"><h2>💡 نکات تغذیه‌ای</h2></div>
+      <div class="card-body">
+        <div class="principle"><span class="pi">🌊</span><span class="pt"><strong>آب:</strong> روزهای تمرین ۳–۳.۵ لیتر — یه بطری ۱L روی میز</span></div>
+        <div class="principle"><span class="pi">☕</span><span class="pt"><strong>کافئین:</strong> قطع تا ساعت ۱۴:۰۰ برای خواب بهتر</span></div>
+        <div class="principle"><span class="pi">📅</span><span class="pt"><strong>روزهای تمرین:</strong> کربو بیشتر / روزهای استراحت: کربو کمتر</span></div>
+        <div class="principle"><span class="pi">⚖️</span><span class="pt"><strong>وزن:</strong> هر دوشنبه صبح ناشتا — هدف ۲۵۰–۵۰۰g در هفته</span></div>
+        <div class="principle"><span class="pi">🥛</span><span class="pt"><strong>Quark:</strong> بهترین کازئین طبیعی — هر شب بدون استثنا</span></div>
+        <div class="principle"><span class="pi">🐟</span><span class="pt"><strong>Räucherlachs:</strong> جایگزین ماهی تن کنسروی + چربی‌های سالم</span></div>
+      </div>
+    </div>
+  `;
+
+  el.innerHTML = html;
+}
+
+// ==================== SHOP ====================
+function setShopFilter(filter, btn) {
+  shopFilter = filter;
+  document.querySelectorAll('.sf-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderShop();
+}
+
+function renderShop() {
+  const el = document.getElementById('shopContent');
+  let totalItems = 0, checkedItems = 0;
+  let html = '';
+
+  SHOP_CATS.forEach((cat, ci) => {
+    const filtered = shopFilter === 'all' ? cat.items : cat.items.filter(i => i.store === shopFilter);
+    if (!filtered.length) return;
+    totalItems += filtered.length;
+    const done = filtered.filter(item => shopState[`${ci}-${cat.items.indexOf(item)}`]).length;
+    checkedItems += done;
+
+    html += `<div class="shop-cat">
+      <div class="shop-cat-hdr">
+        <span class="icon">${cat.icon}</span>
+        <span class="name">${cat.name}</span>
+        <span class="count">${done}/${filtered.length} ${done===filtered.length && filtered.length>0?'✅':''}</span>
+      </div>`;
+
+    filtered.forEach(item => {
+      const oi = cat.items.indexOf(item);
+      const key = `${ci}-${oi}`;
+      const isDone = shopState[key];
+      const storeTag = item.store === 'aldi'
+        ? '<span class="store-tag store-aldi">Aldi/Lidl</span>'
+        : '<span class="store-tag store-rewe">Rewe/Edeka</span>';
+      html += `<div class="shop-item ${isDone?'crossed':''}" onclick="toggleShop('${ci}','${oi}')">
+        <div class="shop-chk ${isDone?'done':''}">${isDone?'✓':''}</div>
+        <div class="shop-info">
+          <div class="sn">${item.name}</div>
+          <div class="ss">${item.sub} ${storeTag}</div>
+        </div>
+        <span class="shop-price">${item.price}</span>
+        <span class="shop-amount">${item.amount}</span>
+      </div>`;
+    });
+
+    html += `</div>`;
+  });
+
+  el.innerHTML = html;
+  document.getElementById('shopChecked').textContent = checkedItems;
+  document.getElementById('shopTotal').textContent = totalItems;
+}
+
+function toggleShop(ci, oi) {
+  const key = `${ci}-${oi}`;
+  shopState[key] = !shopState[key];
+  renderShop();
+}
+
+function resetShop() {
+  Object.keys(shopState).forEach(k => delete shopState[k]);
+  renderShop();
+}
+
+// ==================== INTERACTIONS ====================
+function toggleHabit(dayIdx, hi) {
+  const key = `${dayIdx}-${hi}`;
+  habitState[key] = !habitState[key];
+  renderHabits();
+}
+
+function toggleDayDone(i) {
+  dayDoneState[i] = !dayDoneState[i];
+  renderWeek();
+}
+
+function showPage(name, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  btn.classList.add('active');
+  document.getElementById('contentArea').scrollTop = 0;
+}
+
+// ==================== RENDER ALL ====================
+function renderAll() {
+  renderHeader();
+  renderStats();
+  renderTimeline();
+  renderHabits();
+  renderWeek();
+  renderCodeBlock();
+  renderWorkout();
+  renderNutrition();
+  renderShop();
+}
+
+// Set nutrition type based on current day
+function initNutritionTab() {
+  const t = getTimelineType(DAYS[currentDay]);
+  nutritionType = t === 'cardio' ? 'cardio' : t === 'rest' ? 'rest' : 'train';
+  document.querySelectorAll('.dtype-btn').forEach((btn, i) => {
+    btn.classList.toggle('active', ['train','cardio','rest','office'][i] === nutritionType);
+  });
+}
+
+initNutritionTab();
+renderAll();
+</script>
+</body>
+</html>
