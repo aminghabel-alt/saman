@@ -81,8 +81,8 @@ function _applyPaidBadge() {
 //  STATE
 // ══════════════════════════════════════════════
 let currentStep = 1;
-const TOTAL_STEPS = 7;
-const STEP_LABELS = ['شخصی','کار','ورزش','تمرین','تغذیه','روتین','مرور'];
+const TOTAL_STEPS = 3;
+const STEP_LABELS = ['تو کیستی','روزت','بزن بریم!'];
 
 // ══════════════════════════════════════════════
 //  LOCAL STORAGE — ذخیره و بازیابی وضعیت
@@ -90,26 +90,34 @@ const STEP_LABELS = ['شخصی','کار','ورزش','تمرین','تغذیه','�
 const LS_KEY = 'saman_v1';
 
 function saveState() {
-  const FIELD_IDS = ['f_name','f_gender','f_age','f_height','f_weight','f_city',
+  const FIELD_IDS = ['f_name','f_age','f_city',
+    'f_height','f_weight',
     'f_work_start','f_work_end','f_side_start','f_side_end','f_side_name',
     'f_gym_time','f_gym_dur','f_days_per_week','f_wake','f_sleep','f_sleep_hours',
-    'f_breakfast_time','f_dinner_time','f_avoid'];
+    'f_breakfast_time','f_dinner_time','f_avoid',
+    'f_lang_class_time','f_art_class_time'];
   const fieldVals = {};
   FIELD_IDS.forEach(id => {
     const el = document.getElementById(id);
     if (el) fieldVals[id] = el.value;
   });
   const chipVals = {};
-  ['chips_lang','chips_haswork','chips_sideproject','chips_activity','chips_cardio','chips_diet','chips_meals']
+  ['chips_lang','chips_haswork','chips_sideproject','chips_activity','chips_cardio','chips_diet',
+   'chips_sport_goal','chips_food_type','chips_food_goal','chips_work_type',
+   'chips_lang_method','chips_art_method',
+   'chips_peak_time','chips_gender','chips_gym_pref','chips_meal_count',
+   'chips_lang_time_pref','chips_art_time_pref','chips_custom_time_pref']
     .forEach(id => { chipVals[id] = getChipVal(id); });
   const multiChipVals = {};
-  ['chips_workdays','chips_heavydays']
+  ['chips_workdays','chips_heavydays','chips_domains',
+   'chips_sport_exact_days','chips_lang_class_days','chips_art_class_days','chips_custom_exact_days']
     .forEach(id => { multiChipVals[id] = getChipVals(id); });
   const optVals = {};
   ['opt_goal','opt_gym','opt_split']
     .forEach(id => { optVals[id] = getOptVal(id); });
+  const customLabel = document.getElementById('chip_custom')?.dataset.customLabel || '';
   try {
-    localStorage.setItem(LS_KEY, JSON.stringify({ currentStep, fieldVals, chipVals, multiChipVals, optVals, habits }));
+    localStorage.setItem(LS_KEY, JSON.stringify({ currentStep, fieldVals, chipVals, multiChipVals, optVals, habits, customLabel }));
   } catch(e) {}
 }
 
@@ -140,9 +148,12 @@ function restoreState() {
   // Multi chips
   if (state.multiChipVals) {
     Object.entries(state.multiChipVals).forEach(([id, vals]) => {
+      if (!vals) return;
       const wrap = document.getElementById(id);
-      if (!wrap || !vals) return;
-      wrap.querySelectorAll('.chip').forEach(c => c.classList.toggle('selected', vals.includes(c.dataset.val)));
+      if (!wrap) return;
+      // domain chips use .chip-domain, others use .chip
+      const selector = id === 'chips_domains' ? '.chip-domain' : '.chip';
+      wrap.querySelectorAll(selector).forEach(c => c.classList.toggle('selected', vals.includes(c.dataset.val)));
     });
   }
   // Option cards
@@ -160,6 +171,17 @@ function restoreState() {
   // Step
   if (state.currentStep >= 1 && state.currentStep <= TOTAL_STEPS) {
     currentStep = state.currentStep;
+  }
+  // Restore custom chip label
+  if (state.customLabel) {
+    const chip  = document.getElementById('chip_custom');
+    const label = document.getElementById('chip_custom_label');
+    const input = document.getElementById('chip_custom_input');
+    if (chip && label && input) {
+      label.textContent = state.customLabel;
+      input.value = state.customLabel;
+      chip.dataset.customLabel = state.customLabel;
+    }
   }
   // Sync dependent UI
   toggleWorkFields();
@@ -194,7 +216,7 @@ function renderProgress() {
   document.getElementById('prevBtn').style.display = currentStep === 1 ? 'none' : '';
   const nb = document.getElementById('nextBtn');
   if (currentStep === TOTAL_STEPS) {
-    nb.textContent = '🚀 بساز!';
+    nb.textContent = '🚀 ساخت داشبورد';
     nb.className = 'btn btn-gen';
   } else {
     nb.textContent = 'بعدی ←';
@@ -230,6 +252,161 @@ function initChips(id, multi = false) {
   });
 }
 
+function initDomainChips() {
+  const wrap = document.getElementById('chips_domains');
+  if (!wrap) return;
+
+  // Standard chips (all except custom)
+  wrap.querySelectorAll('.chip-domain:not(.chip-custom)').forEach(c => {
+    c.addEventListener('click', () => {
+      c.classList.toggle('selected');
+      _chipCelebrate(c);
+      saveState();
+    });
+  });
+
+  // Custom chip
+  const customChip  = document.getElementById('chip_custom');
+  const customInput = document.getElementById('chip_custom_input');
+  const customLabel = document.getElementById('chip_custom_label');
+  if (!customChip || !customInput) return;
+
+  // Click on chip → enter edit mode
+  customChip.addEventListener('click', e => {
+    if (e.target === customInput) return; // already editing
+    customChip.classList.add('editing');
+    customInput.focus();
+    customInput.select();
+  });
+
+  // Confirm on Enter
+  customInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); customInput.blur(); }
+    e.stopPropagation(); // prevent wizard navigation
+  });
+
+  // Confirm on blur
+  customInput.addEventListener('blur', () => {
+    customChip.classList.remove('editing');
+    const val = customInput.value.trim();
+    if (val) {
+      customLabel.textContent = val;
+      customChip.dataset.customLabel = val;
+      if (!customChip.classList.contains('selected')) {
+        customChip.classList.add('selected');
+        _chipCelebrate(customChip);
+      }
+    } else {
+      // empty → deselect and reset
+      customLabel.textContent = 'هدف دیگه‌ای داری؟ اضافه کن';
+      customChip.classList.remove('selected');
+      customChip.dataset.customLabel = '';
+    }
+    saveState();
+  });
+}
+
+function _chipCelebrate(c) {
+  c.classList.remove('celebrate');
+  void c.offsetWidth;
+  c.classList.add('celebrate');
+  setTimeout(() => c.classList.remove('celebrate'), 400);
+}
+
+// ── Show/hide step 3 sections (conditional on domains + step 2 answers) ──
+function showStep3Sections() {
+  const domains = getDomainVals();
+  const hasSport  = domains.includes('sport');
+  const hasFood   = domains.includes('food');
+  const hasWork   = domains.includes('work');
+  const hasLang   = domains.includes('language');
+  const hasArt    = domains.includes('art');
+  const hasCustom = domains.includes('custom');
+
+  function toggleS3(id, show) {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('visible', !!show);
+  }
+
+  toggleS3('sec3_sport',    hasSport);
+  toggleS3('sec3_body',     hasSport || hasFood);
+  toggleS3('sec3_food',     hasFood);
+  toggleS3('sec3_work',     hasWork);
+  toggleS3('sec3_language', hasLang);
+  toggleS3('sec3_art',      hasArt);
+  toggleS3('sec3_custom',   hasCustom);
+
+  // Work type sub-conditional
+  if (hasWork) {
+    const workType    = getChipVal('chips_work_type') || 'fixed';
+    const fixedEl     = document.getElementById('work_fixed_times');
+    const freelanceEl = document.getElementById('work_freelance_tip');
+    if (fixedEl)     fixedEl.style.display     = workType === 'fixed' ? '' : 'none';
+    if (freelanceEl) freelanceEl.style.display = workType !== 'fixed' ? '' : 'none';
+  }
+
+  // Language method sub-conditional
+  if (hasLang) {
+    const langMethod  = getChipVal('chips_lang_method') || 'self';
+    const hasClass    = langMethod === 'class' || langMethod === 'both';
+    const langClassEl = document.getElementById('lang_class_schedule');
+    const langSelfEl  = document.getElementById('lang_self_schedule');
+    if (langClassEl) langClassEl.style.display = hasClass ? '' : 'none';
+    if (langSelfEl)  langSelfEl.style.display  = !hasClass ? '' : 'none';
+  }
+
+  // Art method sub-conditional
+  if (hasArt) {
+    const artMethod  = getChipVal('chips_art_method') || 'self';
+    const hasClass   = artMethod === 'class' || artMethod === 'both';
+    const artClassEl = document.getElementById('art_class_schedule');
+    const artSelfEl  = document.getElementById('art_self_schedule');
+    if (artClassEl) artClassEl.style.display = hasClass ? '' : 'none';
+    if (artSelfEl)  artSelfEl.style.display  = !hasClass ? '' : 'none';
+  }
+
+  // Sync custom title from step 1 chip label
+  const customLabelText = document.getElementById('chip_custom_label')?.textContent;
+  const title3 = document.getElementById('sec3_custom_title');
+  if (title3 && customLabelText && customLabelText !== 'هدف دیگه‌ای داری؟ اضافه کن') {
+    title3.textContent = customLabelText;
+  }
+}
+
+// ── Show/hide step 2 domain sections based on step 1 selections ──
+function showDomainSections() {
+  const domains = getDomainVals();
+  document.querySelectorAll('.domain-section').forEach(sec => {
+    const d = sec.dataset.domain;
+    sec.classList.toggle('visible', domains.includes(d));
+  });
+  // Update custom section title from chip label
+  const customLabel = document.getElementById('chip_custom_label')?.textContent;
+  const titleEl = document.getElementById('sec_custom_title');
+  if (titleEl && customLabel && customLabel !== 'هدف دیگه‌ای داری؟ اضافه کن') {
+    titleEl.textContent = customLabel;
+  }
+}
+
+// ── Generic range label updater ──
+function updateRangeVal(el, labelId, suffix) {
+  const label = document.getElementById(labelId);
+  if (label) label.textContent = el.value + suffix;
+  debouncedSave();
+}
+
+// ── Sync sport days → f_days_per_week (for collectData compat) ──
+function syncDPW(val) {
+  const el = document.getElementById('f_days_per_week');
+  if (el) el.value = val;
+}
+
+function getDomainVals() {
+  const wrap = document.getElementById('chips_domains');
+  if (!wrap) return [];
+  return [...wrap.querySelectorAll('.chip-domain.selected')].map(c => c.dataset.val);
+}
+
 function initOptionCards(id) {
   const wrap = document.getElementById(id);
   if (!wrap) return;
@@ -262,11 +439,14 @@ function getOptVal(id) {
 // ══════════════════════════════════════════════
 function toggleWorkFields() {
   const val = getChipVal('chips_haswork');
-  document.getElementById('work_fields').style.display = val === 'no' ? 'none' : '';
+  // step 1 uses 'work_hours_row', step 2 used 'work_fields' — handle both
+  const el = document.getElementById('work_hours_row') || document.getElementById('work_fields');
+  if (el) el.style.display = val === 'no' ? 'none' : '';
 }
 function toggleSideProject() {
   const val = getChipVal('chips_sideproject');
-  document.getElementById('sideproject_fields').style.display = val === 'yes' ? '' : 'none';
+  const el = document.getElementById('sideproject_fields');
+  if (el) el.style.display = val === 'yes' ? '' : 'none';
 }
 
 // ══════════════════════════════════════════════
@@ -275,6 +455,32 @@ function toggleSideProject() {
 function updateDPW(v) {
   document.getElementById('dpw_val').textContent = v + ' روز';
   updateWeekPlan();
+}
+
+function updateSleepHours(v) {
+  const h = parseFloat(v);
+  const whole = Math.floor(h);
+  const half = h % 1 !== 0 ? '.۵' : '';
+  document.getElementById('sleep_hours_val').textContent = whole + half + ' ساعت';
+}
+
+function calcWake() {
+  const sleepEl = document.getElementById('f_sleep');
+  const hoursEl = document.getElementById('f_sleep_hours');
+  const wakeHidden = document.getElementById('f_wake');
+  const wakeDisplay = document.getElementById('wakeDisplay');
+  if (!sleepEl || !hoursEl || !wakeHidden || !wakeDisplay) return;
+
+  const [sh, sm] = sleepEl.value.split(':').map(Number);
+  const totalMins = sh * 60 + sm + Math.round(parseFloat(hoursEl.value) * 60);
+  const wakeH = Math.floor((totalMins % 1440) / 60);
+  const wakeM = totalMins % 60;
+  const pad = n => String(n).padStart(2, '0');
+  const wakeStr = pad(wakeH) + ':' + pad(wakeM);
+
+  wakeHidden.value = wakeStr;
+  wakeDisplay.textContent = wakeStr;
+  debouncedSave();
 }
 
 // ══════════════════════════════════════════════
@@ -330,7 +536,7 @@ function calcCalories() {
   const w = parseFloat(document.getElementById('f_weight')?.value) || 75;
   const h = parseFloat(document.getElementById('f_height')?.value) || 175;
   const a = parseFloat(document.getElementById('f_age')?.value) || 25;
-  const g = document.getElementById('f_gender')?.value || 'male';
+  const g = getChipVal('chips_gender') || 'male';
   const act = parseFloat(getChipVal('chips_activity') || '1.55');
   const goal = getOptVal('opt_goal') || 'bulk';
 
@@ -457,6 +663,8 @@ function showStep(n) {
   if (panel) panel.classList.add('active');
   renderProgress();
 
+  if (n === 2) showDomainSections();
+  if (n === 3) showStep3Sections();
   if (n === 4) updateWeekPlan();
   if (n === 5) renderCalPreview('cal_preview_wrap');
   if (n === 6) renderHabits();
@@ -509,47 +717,80 @@ function generateHub() {
 }
 
 function collectData() {
-  const dpw = parseInt(document.getElementById('f_days_per_week')?.value || 4);
+  const dpw = parseInt(document.getElementById('f_days_per_week')?.value || 3);
   const split = getOptVal('opt_split') || 'ppl';
   const splitData = SPLITS[split] || SPLITS.ppl;
   const closestKey = Object.keys(splitData).reduce((a,b) => Math.abs(parseInt(b)-dpw)<Math.abs(parseInt(a)-dpw)?b:a);
   const weekPlan = splitData[closestKey];
+
+  // ── Gym time from pref chip ──
+  const gymPrefMap = { early:'05:30', morning:'07:30', afternoon:'13:00', evening:'18:00' };
+  const gymPref = getChipVal('chips_gym_pref') || 'morning';
+
+  // ── Peak time → suggested work focus time ──
+  const peakMap = { early:'06:00', morning:'09:00', afternoon:'14:00', evening:'20:00' };
+  const peakTime = getChipVal('chips_peak_time') || 'morning';
+
   const cal = calcCalories();
 
   return {
+    domains: getDomainVals(),
     name: document.getElementById('f_name')?.value || 'کاربر',
-    gender: document.getElementById('f_gender')?.value || 'male',
+    gender: getChipVal('chips_gender') || 'male',
     age: document.getElementById('f_age')?.value || '25',
     height: document.getElementById('f_height')?.value || '175',
     weight: document.getElementById('f_weight')?.value || '75',
     city: document.getElementById('f_city')?.value || '',
     lang: getChipVal('chips_lang') || 'fa',
     hasWork: getChipVal('chips_haswork') !== 'no',
-    workStart: document.getElementById('f_work_start')?.value || '08:00',
-    workEnd: document.getElementById('f_work_end')?.value || '16:00',
+    workType: getChipVal('chips_work_type') || 'fixed',
+    workStart: document.getElementById('f_work_start')?.value || '09:00',
+    workEnd: document.getElementById('f_work_end')?.value || '17:00',
+    workBusyDays: getChipVals('chips_work_busy'),
     workDays: getChipVals('chips_workdays'),
     heavyDays: getChipVals('chips_heavydays'),
     hasSide: getChipVal('chips_sideproject') === 'yes',
     sideStart: document.getElementById('f_side_start')?.value || '16:30',
     sideEnd: document.getElementById('f_side_end')?.value || '18:30',
     sideName: document.getElementById('f_side_name')?.value || 'پروژه جانبی',
-    goal: getOptVal('opt_goal') || 'bulk',
+    goal: getChipVal('chips_sport_goal') || getOptVal('opt_goal') || 'bulk',
     gymType: getOptVal('opt_gym') || 'full',
-    gymTime: document.getElementById('f_gym_time')?.value || '06:00',
+    gymPref,
+    gymTime: gymPrefMap[gymPref] || '07:30',
     gymDur: document.getElementById('f_gym_dur')?.value || '45',
+    sportExactDays: getChipVals('chips_sport_exact_days'),
     daysPerWeek: dpw,
     split,
     weekPlan,
     cardioType: getChipVal('chips_cardio') || 'hiit',
+    foodType: getChipVal('chips_food_type') || 'omni',
+    foodGoal: getChipVal('chips_food_goal') || 'maintain',
     diet: getChipVal('chips_diet') || 'omni',
     avoid: document.getElementById('f_avoid')?.value || '',
-    mealCount: getChipVal('chips_meals') || '5',
-    breakfastTime: document.getElementById('f_breakfast_time')?.value || '07:00',
-    dinnerTime: document.getElementById('f_dinner_time')?.value || '18:30',
-    wake: document.getElementById('f_wake')?.value || '05:00',
-    sleep: document.getElementById('f_sleep')?.value || '22:00',
+    mealCount: getChipVal('chips_meal_count') || '4',
+    breakfastTime: document.getElementById('f_breakfast_time')?.value || '07:30',
+    dinnerTime: document.getElementById('f_dinner_time')?.value || '19:00',
+    wake: document.getElementById('f_wake')?.value || '06:30',
+    sleep: document.getElementById('f_sleep')?.value || '23:00',
     sleepHours: document.getElementById('f_sleep_hours')?.value || '7.5',
-    habits: habits.filter(h => h.label.trim()),
+    peakTime,
+    peakHour: peakMap[peakTime] || '09:00',
+    langMethod: getChipVal('chips_lang_method') || 'self',
+    langMinutes: document.getElementById('f_lang_minutes')?.value || '20',
+    langClassDays: getChipVals('chips_lang_class_days'),
+    langClassTime: document.getElementById('f_lang_class_time')?.value || '18:00',
+    langTimePref: getChipVal('chips_lang_time_pref') || 'evening',
+    artMethod: getChipVal('chips_art_method') || 'self',
+    artClassDays: getChipVals('chips_art_class_days'),
+    artClassTime: document.getElementById('f_art_class_time')?.value || '17:00',
+    artTimePref: getChipVal('chips_art_time_pref') || 'morning',
+    customName: document.getElementById('sec3_custom_title')?.textContent || 'هدف شخصی',
+    customTimePref: getChipVal('chips_custom_time_pref') || 'morning',
+    customExactDays: getChipVals('chips_custom_exact_days'),
+    customMinutes: document.getElementById('f_custom_minutes')?.value || '30',
+    habits: (() => {
+      return habits.filter(h => h.label.trim());
+    })(),
     cal,
   };
 }
@@ -1021,10 +1262,20 @@ function init() {
   // Paywall — avalin chiz
   initPaywall();
 
-  // Single-select chips
-  ['chips_lang','chips_haswork','chips_sideproject','chips_activity','chips_cardio','chips_diet','chips_meals'].forEach(id => initChips(id, false));
-  // Multi-select chips
-  ['chips_workdays','chips_heavydays'].forEach(id => initChips(id, true));
+  // Single-select chips (hidden defaults + step 2)
+  ['chips_lang','chips_haswork','chips_sideproject','chips_activity','chips_cardio','chips_diet',
+   'chips_sport_goal','chips_food_type','chips_food_goal','chips_work_type',
+   'chips_lang_method','chips_art_method'].forEach(id => initChips(id, false));
+  // Multi-select chips (step 2)
+  ['chips_workdays','chips_heavydays','chips_work_busy'].forEach(id => initChips(id, true));
+  // Step 3 single-select chips
+  ['chips_peak_time','chips_gender','chips_gym_pref','chips_meal_count',
+   'chips_lang_time_pref','chips_art_time_pref','chips_custom_time_pref'].forEach(id => initChips(id, false));
+  // Step 3 multi-select chips
+  ['chips_sport_exact_days','chips_lang_class_days','chips_art_class_days',
+   'chips_custom_exact_days'].forEach(id => initChips(id, true));
+  // Domain chips (step 1) — large multi-select with celebration
+  initDomainChips();
   // Option cards
   ['opt_goal','opt_gym','opt_split'].forEach(id => initOptionCards(id));
 
@@ -1032,16 +1283,21 @@ function init() {
   document.getElementById('f_days_per_week')?.addEventListener('input', e => updateDPW(e.target.value));
 
   // Auto-save روی همه input/select fieldha
-  ['f_name','f_gender','f_age','f_height','f_weight','f_city',
+  ['f_name','f_age','f_city',
+   'f_height','f_weight',
    'f_work_start','f_work_end','f_side_start','f_side_end','f_side_name',
    'f_gym_time','f_gym_dur','f_days_per_week','f_wake','f_sleep','f_sleep_hours',
-   'f_breakfast_time','f_dinner_time','f_avoid'].forEach(id => {
+   'f_breakfast_time','f_dinner_time','f_avoid',
+   'f_lang_class_time','f_art_class_time'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.addEventListener('input', debouncedSave);
   });
 
   // Notifications — baad az restore state
   initNotifications();
+  // Sleep calc — sync wake time on load
+  updateSleepHours(document.getElementById('f_sleep_hours')?.value || '7.5');
+  calcWake();
 
   // ── Profile auto-load ──
   // Agar ?edit=true nabashad va profile kamel dare → dashbord ro direct show bede

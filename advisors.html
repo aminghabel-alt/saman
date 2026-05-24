@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مشاوران طراحی — سامان</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #080b12;
+    --surface:   #111827;
+    --surface2:  #1a2235;
+    --border:    #1f2d45;
+    --accent:    #3b82f6;
+    --green:     #34d399;
+    --purple:    #a78bfa;
+    --orange:    #fb923c;
+    --yellow:    #fbbf24;
+    --text:      #e2e8f0;
+    --muted:     #64748b;
+    --radius:    14px;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+    min-height: 100vh;
+    padding: 0 0 60px;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 28px 32px 24px;
+    text-align: center;
+  }
+  .header h1 { font-size: 1.6rem; font-weight: 800; letter-spacing: -0.5px; }
+  .header h1 span { color: var(--accent); }
+  .header p { color: var(--muted); font-size: .9rem; margin-top: 6px; }
+  .header-badge {
+    display: inline-block;
+    background: rgba(59,130,246,.15);
+    border: 1px solid rgba(59,130,246,.3);
+    color: var(--accent);
+    font-size: .75rem;
+    padding: 3px 12px;
+    border-radius: 20px;
+    margin-top: 10px;
+  }
+
+  /* ── ADVISOR CARDS ROW ── */
+  .advisors-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    padding: 28px 32px 0;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  @media(max-width: 900px) { .advisors-row { grid-template-columns: repeat(2,1fr); } }
+  @media(max-width: 560px) { .advisors-row { grid-template-columns: 1fr; } }
+
+  .advisor-card {
+    background: var(--surface);
+    border: 2px solid transparent;
+    border-radius: var(--radius);
+    padding: 18px 16px;
+    cursor: pointer;
+    transition: border-color .2s, transform .15s;
+    text-align: center;
+  }
+  .advisor-card:hover { transform: translateY(-2px); }
+  .advisor-card.active { border-color: var(--accent); }
+
+  .adv-avatar {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem;
+    margin: 0 auto 12px;
+  }
+  .adv-name { font-weight: 700; font-size: 1rem; }
+  .adv-role { font-size: .75rem; color: var(--muted); margin-top: 3px; line-height: 1.4; }
+  .adv-tag {
+    display: inline-block;
+    font-size: .68rem; font-weight: 700;
+    padding: 2px 9px;
+    border-radius: 20px;
+    margin-top: 10px;
+  }
+
+  /* ── PAGE TABS ── */
+  .tabs-wrap {
+    max-width: 1200px;
+    margin: 28px auto 0;
+    padding: 0 32px;
+  }
+  .tabs {
+    display: flex;
+    gap: 8px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0;
+  }
+  .tab-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: .9rem;
+    font-weight: 600;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -1px;
+    transition: color .2s, border-color .2s;
+    font-family: inherit;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* ── CONTENT AREA ── */
+  .content {
+    max-width: 1200px;
+    margin: 24px auto 0;
+    padding: 0 32px;
+    display: none;
+  }
+  .content.active { display: block; }
+
+  /* ── PAGE GOAL BOX ── */
+  .page-goal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 22px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .pg-icon { font-size: 1.8rem; flex-shrink: 0; }
+  .pg-title { font-weight: 700; font-size: 1rem; margin-bottom: 4px; }
+  .pg-desc { font-size: .85rem; color: var(--muted); line-height: 1.6; }
+
+  /* ── ADVICE GRID ── */
+  .advice-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  @media(max-width: 700px) { .advice-grid { grid-template-columns: 1fr; } }
+
+  .advice-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .advice-card::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 4px; height: 100%;
+  }
+
+  .ac-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .ac-avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; flex-shrink: 0;
+  }
+  .ac-name { font-weight: 700; font-size: .9rem; }
+  .ac-book { font-size: .72rem; color: var(--muted); }
+
+  .ac-quote {
+    font-size: .8rem;
+    font-style: italic;
+    color: var(--accent);
+    border-right: 3px solid var(--accent);
+    padding-right: 10px;
+    margin-bottom: 14px;
+    line-height: 1.5;
+  }
+
+  .ac-points { list-style: none; }
+  .ac-points li {
+    font-size: .83rem;
+    color: #cbd5e1;
+    padding: 5px 0;
+    padding-right: 16px;
+    position: relative;
+    line-height: 1.5;
+    border-bottom: 1px solid var(--border);
+  }
+  .ac-points li:last-child { border-bottom: none; }
+  .ac-points li::before {
+    content: '›';
+    position: absolute;
+    right: 0;
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  /* ── NOTES SECTION ── */
+  .notes-section {
+    margin-top: 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+  }
+  .notes-label {
+    font-size: .8rem;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+  }
+  .notes-area {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: .88rem;
+    font-family: inherit;
+    padding: 12px 14px;
+    resize: vertical;
+    min-height: 90px;
+    line-height: 1.6;
+    direction: rtl;
+  }
+  .notes-area:focus { outline: none; border-color: var(--accent); }
+  .notes-save-btn {
+    margin-top: 10px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 20px;
+    font-size: .83rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: opacity .2s;
+  }
+  .notes-save-btn:hover { opacity: .85; }
+  .notes-saved { font-size: .78rem; color: var(--green); margin-top: 6px; display: none; }
+
+  /* ── DECISION LOG ── */
+  .decision-log {
+    margin-top: 14px;
+  }
+  .decision-item {
+    background: var(--surface2);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: .82rem;
+    color: #94a3b8;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    line-height: 1.5;
+  }
+  .di-time { color: var(--muted); font-size: .72rem; white-space: nowrap; margin-top: 2px; }
+
+  /* color themes per advisor */
+  .fogg  { --adv: #34d399; }
+  .krug  { --adv: #60a5fa; }
+  .clear { --adv: #f472b6; }
+  .ariely{ --adv: #fb923c; }
+
+  .advice-card.fogg::before   { background: #34d399; }
+  .advice-card.krug::before   { background: #60a5fa; }
+  .advice-card.clear::before  { background: #f472b6; }
+  .advice-card.ariely::before { background: #fb923c; }
+
+  .fogg  .ac-quote { color: #34d399; border-right-color: #34d399; }
+  .krug  .ac-quote { color: #60a5fa; border-right-color: #60a5fa; }
+  .clear .ac-quote { color: #f472b6; border-right-color: #f472b6; }
+  .ariely .ac-quote { color: #fb923c; border-right-color: #fb923c; }
+
+  .fogg  .ac-points li::before { color: #34d399; }
+  .krug  .ac-points li::before { color: #60a5fa; }
+  .clear .ac-points li::before { color: #f472b6; }
+  .ariely .ac-points li::before { color: #fb923c; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>مشاوران طراحی <span>سامان</span></h1>
+  <p>دیدگاه ۴ متخصص واقعی برای طراحی بهینه هر سه صفحه</p>
+  <div class="header-badge">🔒 استفاده داخلی — ابزار طراحی</div>
+</div>
+
+<!-- ── ADVISOR CARDS ── -->
+<div class="advisors-row">
+
+  <div class="advisor-card fogg active" onclick="setAdvisor('fogg',this)">
+    <div class="adv-avatar" style="background:rgba(52,211,153,.15)">🧠</div>
+    <div class="adv-name">BJ Fogg</div>
+    <div class="adv-role">Stanford · Behavior Design Lab<br>Tiny Habits</div>
+    <div class="adv-tag" style="background:rgba(52,211,153,.15);color:#34d399">Behavior Design</div>
+  </div>
+
+  <div class="advisor-card krug" onclick="setAdvisor('krug',this)">
+    <div class="adv-avatar" style="background:rgba(96,165,250,.15)">👁</div>
+    <div class="adv-name">Steve Krug</div>
+    <div class="adv-role">Don't Make Me Think<br>UX Usability Expert</div>
+    <div class="adv-tag" style="background:rgba(96,165,250,.15);color:#60a5fa">Simplicity First</div>
+  </div>
+
+  <div class="advisor-card clear" onclick="setAdvisor('clear',this)">
+    <div class="adv-avatar" style="background:rgba(244,114,182,.15)">⚛️</div>
+    <div class="adv-name">James Clear</div>
+    <div class="adv-role">Atomic Habits · 10M+ copies<br>Habit Systems Expert</div>
+    <div class="adv-tag" style="background:rgba(244,114,182,.15);color:#f472b6">Habit Formation</div>
+  </div>
+
+  <div class="advisor-card ariely" onclick="setAdvisor('ariely',this)">
+    <div class="adv-avatar" style="background:rgba(251,146,60,.15)">🎲</div>
+    <div class="adv-name">Dan Ariely</div>
+    <div class="adv-role">Duke University<br>Predictably Irrational</div>
+    <div class="adv-tag" style="background:rgba(251,146,60,.15);color:#fb923c">Behavioral Econ</div>
+  </div>
+
+</div>
+
+<!-- ── TABS ── -->
+<div class="tabs-wrap">
+  <div class="tabs">
+    <button class="tab-btn active" onclick="setTab(1,this)">🌱 صفحه ۱ — Onboarding</button>
+    <button class="tab-btn" onclick="setTab(2,this)">📅 صفحه ۲ — جزئیات</button>
+    <button class="tab-btn" onclick="setTab(3,this)">🚀 صفحه ۳ — داشبورد</button>
+  </div>
+</div>
+
+<!-- ══════════════════════ PAGE 1 ══════════════════════ -->
+<div class="content active" id="tab-1">
+  <div class="page-goal">
+    <div class="pg-icon">🌱</div>
+    <div>
+      <div class="pg-title">هدف صفحه ۱: شناخت نیاز اصلی کاربر</div>
+      <div class="pg-desc">این صفحه باید بفهمه کاربر دقیقاً چی می‌خواد سامان بشه — بدون friction، بدون فرم خسته‌کننده. اولین تجربه باید اینقدر ساده باشه که کاربر حس کنه "این دقیقاً برای منه".</div>
+    </div>
+  </div>
+
+  <div class="advice-grid">
+
+    <div class="advice-card fogg">
+      <div class="ac-header">
+        <div class="ac-avatar" style="background:rgba(52,211,153,.15)">🧠</div>
+        <div><div class="ac-name">BJ Fogg</div><div class="ac-book">Tiny Habits · Behavior Design</div></div>
+      </div>
+      <div class="ac-quote">"Motivation is unreliable. Design for the moment of peak motivation — which is exactly when someone first opens your app."</div>
+      <ul class="ac-points">
+        <li>سوال اول باید identity-based باشه: «می‌خوای چه نوع آدمی باشی؟» نه «چی می‌خوای انجام بدی؟»</li>
+        <li>هر انتخاب باید یه tiny win حس بده — کاربر باید بعد از صفحه ۱ احساس پیشرفت کنه</li>
+        <li>حداکثر ۳ سوال — بیشتر از این motivation رو از بین می‌بره</li>
+        <li>Default‌ها رو هوشمند انتخاب کن — اکثر کاربرها چه می‌خوان؟ همون رو pre-select کن</li>
+        <li>بعد از انتخاب هر chip یه micro-celebration کوچیک بذار (انیمیشن یا رنگ)</li>
+      </ul>
+    </div>
+
+    <div class="advice-card krug">
+      <div class="ac-header">
+        <div class="ac-avatar" style="background:rgba(96,165,250,.15)">👁</div>
+        <div><div class="ac-name">Steve Krug</div><div class="ac-book">Don't Make Me Think</div></div>
+      </div>
+      <div class="ac-quote">"Users don't read — they scan. The first screen must communicate its purpose in under 3 seconds."</div>
+      <ul class="ac-points">
+        <li>هر چیزی که ضروری نیست رو حذف کن — قد و وزن در صفحه ۱ ضروری نیست، بذارش صفحه ۲</li>
+        <li>انتخاب‌ها باید بزرگ، واضح، و visually distinct باشن — کاربر نباید فکر کنه</li>
+        <li>عنوان صفحه باید سوال مستقیم باشه: «چی می‌خوای سامان بشه؟» — نه توضیح</li>
+        <li>تعداد انتخاب‌ها: حداکثر ۵-۶ chip — بیشتر از این paradox of choice ایجاد می‌کنه</li>
+        <li>اسم کاربر رو اول بخواه — یه کلمه، ساده، شخصی‌سازی فوری</li>
+      </ul>
+    </div>
+
+    <div class="advice-card clear">
+      <div class="ac-header">
+        <div class="ac-avatar" style="background:rgba(244,114,182,.15)">⚛️</div>
+        <div><div class="ac-name">James Clear</div><div class="ac-book">Atomic Habits</div></div>
+      </div>
+      <div class="ac-quote">"Every action you take is a vote for the type of person you wish to become."</div>
+      <ul class="ac-points">
+        <li>فریم‌بندی identity: نپرس «می‌خوای ورزش کنی؟» — بپرس «می‌خوای آدمی باشی که هر روز ورزش می‌کنه؟»</li>
+        <li>هر انتخاب در صفحه ۱ باید به یه هویت واضح وصل باشه — این engagement رو بالا می‌بره</li>
+        <li>نشون بده که دیگران چی انتخاب کردن (social proof) — «۷۸٪ کاربرها ورزش رو انتخاب کردن»</li>
+        <li>commit کردن به اهداف رو در صفحه ۱ visible کن — انتخاب‌های کاربر رو highlight کن</li>
+      </ul>
+    </div>
+
+    <div class="advice-card ariely">
+      <div class="ac-header">
+        <div class="ac-avatar" style="background:rgba(251,146,60,.15)">🎲</div>
+        <div><div class="ac-name">Dan Ariely</div><div class="ac-book">Predictably Irrational</div></div>
+      </div>
+      <div class="ac-quote">"The first anchor you set becomes the reference point for all future decisions."</div>
+      <ul class="ac-points">
+        <li>اولین chip‌ی که نشون میدی anchor میشه — مهم‌ترین حوزه (ورزش) رو اول بذار</li>
+        <li>از opt-out بجای opt-in استفاده کن — chip‌های pre-selected بهتر از خالی</li>
+        <li>اگه میشه گزینه‌ها رو سه‌تایی بذار: basic / standard / full — آدم‌ها middle رو انتخاب می‌کنن</li>
+        <li>سوال «آیا می‌خوای پروژه جانبی داشته باشی؟» رو در مثبت فریم کن — «پروژه‌ای داری که می‌خوای بهش وقت بدی؟»</li>
+        <li>commitment device: بذار کاربر انتخاب‌هاش رو ببینه قبل از رفتن به صفحه ۲</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <div class="notes-section">
+    <div class="notes-label">📝 یادداشت‌های طراحی — صفحه ۱</div>
+    <textarea class="notes-area" id="notes-1" placeholder="تصمیمات، سوالات، و ایده‌هات برای صفحه ۱ رو اینجا بنویس..."></textarea>
+    <button class="notes-save-btn" onclick="saveNote(1)">ذخیره یادداشت</button>
+    <div class="notes-saved" id="saved-1">✓ ذخیره شد</div>
+    <div class="decision-log" id="log-1"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════ PAGE 2 ══════════════════════ -->
+<div class="content" id="tab-2">
+  <div class="page-goal">
+    <div class="pg-icon">📅</div>
+    <div>
+      <div class="pg-title">هدف صفحه ۲: جمع‌آوری جزئیات هر حوزه</div>
+      <div class="pg-desc">این صفحه فقط سوال‌هایی رو نشون میده که کاربر در صفحه ۱ انتخاب کرده. هر سوال باید دقیقاً یه چیز مشخص رو بپرسه — نه بیشتر. هدف: کمترین friction برای بیشترین اطلاعات مفید.</div>
+    </div>
+  </div>
+
+  <div class="advice-grid">
+
+    <div class="advice-card fogg">
+      <div class="ac-header">
+        <div class="ac-avatar" style="background:rgba(52,211,153,.15)">🧠</div>
+        <div><div class="ac-name">BJ Fogg</div><div class="ac-book">Tiny Habits · Behavior Design</div></div>
+      </div>
+      <div class="ac-quote">"Ask only what you need right now. Every extra question reduces completion rate."</div>
+      <ul class="ac-points">
+        <li>برای ورزش: فقط هدف و تعداد روز — بقیه (ساعت، نوع تمرین) بذارش برای بعد</li>
+        <li>سوال‌ها رو کوچیک کن: «چند روز در هفته؟» با slider بهتر از هر چیز دیگه‌ایه</li>
+        <li>برای تغذیه: یه سوال — «چه نوع رژیمی؟» با ۳-۴ انتخاب واضح. نه بیشتر</li>
+        <li>اگه کاربر چیزی رو انتخاب نکرد (مثلاً تغذیه) هیچ سوالی نپرس — invisible باشه</li>
+        <li>progress indicator واضح باشه — کاربر باید بدونه چقدر مونده</li>
+      </ul>
+    </div>
+
+    <div class="advice-card krug">
+      <div class="ac-header">
+        <div class="ac-avatar" style="background:rgba(96,165,250,.15)">👁</div>
+        <div><div class="ac-name">Steve Krug</div><div class="ac-book">Don't Make Me Think</div></div>
+      </div>
+      <div class="ac-quote">"If something requires a long explanation, it's a sign the design has failed."</div>
+      <ul class="ac-points">
+        <li>هر section یه heading واضح داشته باشه — «⏰ ساعت کاریت» بجای «مشخصات شغلی»</li>
+        <li>time picker‌ها رو با مقدار پیش‌فرض معقول بذار — کاربر فقط اصلاح می‌کنه، از صفر شروع نمی‌کنه</li>
+        <li>label‌ها باید human باشن: «کی بیدار میشی؟» نه «ساعت بیداری»</li>
+        <li>هر section رو با divider جدا کن — چشم باید بتونه صفحه رو scan کنه</li>
+        <li>اگه یه سوال برای همه sections مشترکه (مثل بیداری/خواب) یه بار بپرس، نه چند بار</li>
+      </ul>
+    </div>
+
+    <div class="advice-card clear">
+      <div class="ac-header">
+        <div class="ac-avatar" style="background:rgba(244,114,182,.15)">⚛️</div>
+        <div><div class="ac-name">James Clear</div><div class="ac-book">Atomic Habits</div></div>
+      </div>
+      <div class="ac-quote">"Habit stacking: pair your new habit with an existing behavior. Ask about existing schedule first."</div>
+      <ul class="ac-points">
+        <li>ابتدا بپرس کاربر الان چه روتینی داره — بعد پیشنهاد بده ورزش کجا fit میشه</li>
+        <li>برای ورزش: ساعت بپرس، بعد یه پیشنهاد بده «معمولاً بعد از بیداری بهتره» — راهنمایی کن</li>
+        <li>habit stacking prompt: «ورزشت رو بعد از کدوم کار روزانه انجام می‌دی؟»</li>
+        <li>نشون بده که ترکیب اهداف انتخابی چقدر با هم سازگارن — اگه conflict دارن هشدار بده</li>
+      </ul>
+    </div>
+
+    <div class="advice-card ariely">
+      <div class="ac-header">
+        <div class="ac-avatar" style="background:rgba(251,146,60,.15)">🎲</div>
+        <div><div class="ac-name">Dan Ariely</div><div class="ac-book">Predictably Irrational</div></div>
+      </div>
+      <div class="ac-quote">"People don't know what they want until they see it. Show them options, not blank fields."</div>
+      <ul class="ac-points">
+        <li>جای blank input، گزینه‌های از پیش تعریف‌شده بده — کاربر ۶ صبح رو با slider انتخاب می‌کنه نه تایپ</li>
+        <li>anchoring در مدت ورزش: اگه ۴۵ دقیقه رو default بذاری، اکثر همونو نگه می‌دارن</li>
+        <li>برای نوع تغذیه، گزینه «همه چیزخور» رو اول بذار — این anchor میشه</li>
+        <li>نشون بده که آدم‌های مشابه چی انتخاب کردن: «اکثر کاربرها با هدف عضله‌سازی ۴ روز تمرین می‌کنن»</li>
+        <li>اگه کاربر داره exit می‌کنه، با یه nudge نگهش دار: «فقط ۲ سوال مونده!»</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <div class="notes-section">
+    <div class="notes-label">📝 یادداشت‌های طراحی — صفحه ۲</div>
+    <textarea class="notes-area" id="notes-2" placeholder="تصمیمات، سوالات، و ایده‌هات برای صفحه ۲ رو اینجا بنویس..."></textarea>
+    <button class="notes-save-btn" onclick="saveNote(2)">ذخیره یادداشت</button>
+    <div class="notes-saved" id="saved-2">✓ ذخیره شد</div>
+    <div class="decision-log" id="log-2"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════ PAGE 3 ══════════════════════ -->
+<div class="content" id="tab-3">
+  <div class="page-goal">
+    <div class="pg-icon">🚀</div>
+    <div>
+      <div class="pg-title">هدف صفحه ۳: داشبوردی که آرامش و انگیزه میده</div>
+      <div class="pg-desc">این داشبورد هدف اصلی محصوله. باید در ۲ ثانیه قابل scan باشه، حس پیشرفت بده، و کاربر رو هر روز برگردونه. نه اطلاعات زیاد — بلکه اطلاعات درست در جای درست.</div>
+    </div>
+  </div>
+
+  <div class="advice-grid">
+
+    <div class="advice-card fogg">
+      <div class="ac-header">
+        <div class="ac-avatar" style="background:rgba(52,211,153,.15)">🧠</div>
+        <div><div class="ac-name">BJ Fogg</div><div class="ac-book">Tiny Habits · Behavior Design</div></div>
+      </div>
+      <div class="ac-quote">"After a tiny habit, celebrate immediately. The feeling of success is what wires the habit into the brain."</div>
+      <ul class="ac-points">
+        <li>وقتی کاربر یه عادت رو tick می‌کنه، یه celebration کوچیک نشون بده — انیمیشن، رنگ، صدا</li>
+        <li>داشبورد باید «برنامه امروز» رو اول نشون بده — نه آمار کلی</li>
+        <li>هر item در لیست روزانه باید tiny و قابل انجام باشه — نه «ورزش ۹۰ دقیقه» بلکه «رفتن به باشگاه»</li>
+        <li>motivation trigger: اگه کاربر اول صبح داشبورد رو باز کنه، یه پیام انگیزشی کوتاه نشون بده</li>
+        <li>از دست دادن streak باید بدون قضاوت باشه — «فردا دوباره شروع کن» نه «خراب کردی»</li>
+      </ul>
+    </div>
+
+    <div class="advice-card krug">
+      <div class="ac-header">
+        <div class="ac-avatar" style="background:rgba(96,165,250,.15)">👁</div>
+        <div><div class="ac-name">Steve Krug</div><div class="ac-book">Don't Make Me Think</div></div>
+      </div>
+      <div class="ac-quote">"The most important thing about a dashboard is that users should be able to understand their status at a glance."</div>
+      <ul class="ac-points">
+        <li>hierarchy واضح: امروز → این هفته → کلی. نه برعکس</li>
+        <li>هر card در داشبورد فقط یه چیز بگه — یه number، یه status، یه action</li>
+        <li>رنگ‌ها باید معنی داشته باشن و consistent باشن: سبز = انجام شد، خاکستری = باقیمونده</li>
+        <li>دکمه ویرایش باید visible باشه ولی dominant نباشه — کوچیک ولی قابل پیدا کردن</li>
+        <li>اگه کاربر هیچ چیزی برای امروز نداره، داشبورد خالی نشون نده — empty state راهنما باشه</li>
+      </ul>
+    </div>
+
+    <div class="advice-card clear">
+      <div class="ac-header">
+        <div class="ac-avatar" style="background:rgba(244,114,182,.15)">⚛️</div>
+        <div><div class="ac-name">James Clear</div><div class="ac-book">Atomic Habits</div></div>
+      </div>
+      <div class="ac-quote">"Never miss twice. The first mistake is never the problem — it's the spiral of repeated mistakes."</div>
+      <ul class="ac-points">
+        <li>streak tracking برای هر عادت — visualize کن، نه فقط عدد بنویس</li>
+        <li>«never miss twice» rule رو در UI بذار: اگه دیروز miss شد، امروز highlight بشه</li>
+        <li>habit stacking رو در داشبورد نشون بده: «بعد از صبحانه ← ورزش ← دوش»</li>
+        <li>هفتگی review بذار: «این هفته ۵ از ۷ روز ورزش کردی — عالیه»</li>
+        <li>identity reinforcement: «تو کسی هستی که [هدف] انجام میده» — این رو visible کن</li>
+      </ul>
+    </div>
+
+    <div class="advice-card ariely">
+      <div class="ac-header">
+        <div class="ac-avatar" style="background:rgba(251,146,60,.15)">🎲</div>
+        <div><div class="ac-name">Dan Ariely</div><div class="ac-book">Predictably Irrational</div></div>
+      </div>
+      <div class="ac-quote">"Loss aversion is twice as powerful as the pleasure of gains. Show what's at stake."</div>
+      <ul class="ac-points">
+        <li>loss framing: «اگه امروز ورزش نکنی، streak ۵ روزه‌ات میشکنه» قوی‌تر از «امروز ورزش کن»</li>
+        <li>sunk cost رو positive کن: «تا اینجا X روز اومدی — ادامه بده»</li>
+        <li>ownership effect: کاری کن کاربر داشبورد رو «مال خودش» بدونه — اسم، رنگ، شخصی‌سازی</li>
+        <li>completion bias: آیتم‌های نزدیک به تموم شدن رو اول نشون بده — آدم‌ها چیزی رو که نزدیکه تموم میشن</li>
+        <li>variable reward: گاهی یه surprise نشون بده — «امروز هفتمین روز متوالیته — یه milestone!»</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <div class="notes-section">
+    <div class="notes-label">📝 یادداشت‌های طراحی — صفحه ۳</div>
+    <textarea class="notes-area" id="notes-3" placeholder="تصمیمات، سوالات، و ایده‌هات برای صفحه ۳ رو اینجا بنویس..."></textarea>
+    <button class="notes-save-btn" onclick="saveNote(3)">ذخیره یادداشت</button>
+    <div class="notes-saved" id="saved-3">✓ ذخیره شد</div>
+    <div class="decision-log" id="log-3"></div>
+  </div>
+</div>
+
+<script>
+// ── Tab switching ──
+function setTab(n, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-' + n).classList.add('active');
+}
+
+// ── Advisor highlight (cosmetic only) ──
+function setAdvisor(name, card) {
+  document.querySelectorAll('.advisor-card').forEach(c => c.classList.remove('active'));
+  card.classList.add('active');
+}
+
+// ── Notes: save to localStorage ──
+function saveNote(page) {
+  const text = document.getElementById('notes-' + page).value.trim();
+  if (!text) return;
+  const key = 'saman_design_notes_' + page;
+  const notes = JSON.parse(localStorage.getItem(key) || '[]');
+  const now = new Date();
+  const time = now.toLocaleDateString('fa-IR') + ' ' + now.toLocaleTimeString('fa-IR', {hour:'2-digit',minute:'2-digit'});
+  notes.push({ text, time });
+  localStorage.setItem(key, JSON.stringify(notes));
+  document.getElementById('notes-' + page).value = '';
+  const saved = document.getElementById('saved-' + page);
+  saved.style.display = 'block';
+  setTimeout(() => saved.style.display = 'none', 2000);
+  renderLog(page);
+}
+
+// ── Notes: render log ──
+function renderLog(page) {
+  const key = 'saman_design_notes_' + page;
+  const notes = JSON.parse(localStorage.getItem(key) || '[]');
+  const log = document.getElementById('log-' + page);
+  if (!notes.length) { log.innerHTML = ''; return; }
+  log.innerHTML = notes.slice().reverse().map(n => `
+    <div class="decision-item">
+      <span style="flex:1">${n.text}</span>
+      <span class="di-time">${n.time}</span>
+    </div>
+  `).join('');
+}
+
+// ── Init: restore notes ──
+document.addEventListener('DOMContentLoaded', () => {
+  [1,2,3].forEach(renderLog);
+});
+</script>
+
+</body>
+</html>

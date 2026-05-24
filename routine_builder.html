@@ -67,232 +67,438 @@
 
 <div class="form-wrap" id="formWrap">
 
-  <!-- STEP 1: Personal -->
+  <!-- STEP 1: می‌خوای چه کارهایی رو سامان بدی؟ -->
   <div class="step-panel" id="step-1">
-    <div class="step-heading">👤 اطلاعات شخصی</div>
-    <div class="step-sub">اسمت چیه و چه مشخصاتی داری؟</div>
-    <div class="row-2">
-      <div class="field"><label>اسم <span>*</span></label><input id="f_name" placeholder="مثلاً امین" /></div>
-      <div class="field">
-        <label>جنسیت <span>*</span></label>
-        <select id="f_gender"><option value="">انتخاب کن</option><option value="male">مرد</option><option value="female">زن</option></select>
+    <div class="step-heading">می‌خوای چه کارهایی رو سامان بدی؟</div>
+    <div class="step-sub">انتخاب کن — بقیه‌اش رو سامان حل می‌کنه</div>
+
+    <div class="chips-domains" id="chips_domains">
+      <div class="chip-domain selected" data-val="sport">
+        <span class="cd-icon">🏋️</span>
+        <span class="cd-text">ورزش</span>
+        <span class="cd-check"></span>
+      </div>
+      <div class="chip-domain selected" data-val="food">
+        <span class="cd-icon">🍎</span>
+        <span class="cd-text">خوراک</span>
+        <span class="cd-check"></span>
+      </div>
+      <div class="chip-domain selected" data-val="work">
+        <span class="cd-icon">💼</span>
+        <span class="cd-text">کار</span>
+        <span class="cd-check"></span>
+      </div>
+      <div class="chip-domain" data-val="language">
+        <span class="cd-icon">📚</span>
+        <span class="cd-text">زبان</span>
+        <span class="cd-check"></span>
+      </div>
+      <div class="chip-domain" data-val="art">
+        <span class="cd-icon">🎨</span>
+        <span class="cd-text">هنر</span>
+        <span class="cd-check"></span>
+      </div>
+      <div class="chip-domain chip-custom" data-val="custom" id="chip_custom">
+        <span class="cd-icon">✏️</span>
+        <span class="cd-text" id="chip_custom_label">هدف دیگه‌ای داری؟ اضافه کن</span>
+        <input class="cd-custom-input" id="chip_custom_input" type="text" placeholder="اسمش رو بنویس" maxlength="20" dir="rtl" />
+        <span class="cd-check"></span>
       </div>
     </div>
-    <div class="row-3">
-      <div class="field"><label>سن</label><input id="f_age" type="number" placeholder="۲۵" min="14" max="80" /></div>
-      <div class="field"><label>قد (cm)</label><input id="f_height" type="number" placeholder="۱۷۵" min="140" max="220" /></div>
-      <div class="field"><label>وزن (kg)</label><input id="f_weight" type="number" placeholder="۷۵" min="40" max="200" /></div>
-    </div>
-    <div class="field">
-      <label>محل زندگی / شهر</label>
-      <input id="f_city" placeholder="مثلاً تهران یا Munich" />
-    </div>
-    <div class="field">
-      <label>زبان داشبورد</label>
-      <div class="chips" id="chips_lang">
-        <div class="chip selected" data-val="fa">🇮🇷 فارسی</div>
-        <div class="chip" data-val="de">🇩🇪 Deutsch</div>
-        <div class="chip" data-val="en">🇬🇧 English</div>
-      </div>
-    </div>
+
+    <!-- Hidden defaults -->
+    <input id="f_name"   type="hidden" value="کاربر" />
+    <input id="f_age"    type="hidden" value="25" />
+    <input id="f_city"   type="hidden" value="" />
   </div>
 
-  <!-- STEP 2: Work -->
+  <!-- STEP 2: چند تا سوال کوتاه -->
   <div class="step-panel" id="step-2">
-    <div class="step-heading">💼 برنامه کاری</div>
-    <div class="step-sub">ساعات و روزهای کاریت رو مشخص کن.</div>
-    <div class="field">
-      <label>آیا شغل / تحصیل ثابت داری؟</label>
-      <div class="chips" id="chips_haswork">
-        <div class="chip selected green" data-val="yes">بله، ساعت ثابت دارم</div>
-        <div class="chip green" data-val="freelance">فریلنس / نامنظم</div>
-        <div class="chip green" data-val="no">خیر</div>
+    <div class="step-heading">📅 چند تا سوال کوتاه</div>
+    <div class="step-sub">سریع جواب بده — سیستم بقیه رو حساب می‌کنه</div>
+
+    <!-- ── خواب (همیشه اول) ── -->
+    <div class="sleep-block">
+      <div class="sleep-row">
+        <div class="field">
+          <label>😴 کی می‌خوابی؟</label>
+          <input id="f_sleep" type="time" value="23:00" oninput="calcWake()" />
+        </div>
+        <div class="field">
+          <label>⏰ چند ساعت می‌خوای بخوابی؟</label>
+          <div class="range-wrap">
+            <input type="range" id="f_sleep_hours" min="5" max="10" step="0.5" value="7.5"
+                   oninput="updateSleepHours(this.value); calcWake()" />
+            <div class="range-val" id="sleep_hours_val">۷.۵ ساعت</div>
+          </div>
+        </div>
+      </div>
+      <div class="wake-result">
+        🌅 بیداری پیشنهادی: <strong id="wakeDisplay">۰۶:۳۰</strong>
+        <input id="f_wake" type="hidden" value="06:30" />
       </div>
     </div>
-    <div id="work_fields">
-      <div class="row-2">
-        <div class="field"><label>شروع کار</label><input id="f_work_start" type="time" value="08:00" /></div>
-        <div class="field"><label>پایان کار</label><input id="f_work_end" type="time" value="16:00" /></div>
-      </div>
+
+    <!-- ── ورزش ── -->
+    <div class="domain-section" id="sec_sport" data-domain="sport">
+      <div class="sec-header"><span>🏋️</span> ورزش</div>
       <div class="field">
-        <label>روزهای کاری</label>
-        <div class="chips" id="chips_workdays">
-          <div class="chip selected green" data-val="Mo">Mo</div>
-          <div class="chip selected green" data-val="Di">Di</div>
-          <div class="chip selected green" data-val="Mi">Mi</div>
-          <div class="chip selected green" data-val="Do">Do</div>
-          <div class="chip selected green" data-val="Fr">Fr</div>
-          <div class="chip green" data-val="Sa">Sa</div>
-          <div class="chip green" data-val="So">So</div>
+        <label>هدفت از ورزش چیه؟</label>
+        <div class="chips" id="chips_sport_goal">
+          <div class="chip selected" data-val="bulk">💪 عضله‌سازی</div>
+          <div class="chip" data-val="cut">🔥 چربی‌سوزی</div>
+          <div class="chip" data-val="maintain">⚖️ حفظ فرم</div>
         </div>
       </div>
       <div class="field">
-        <label>روزهای سنگین (جلسه زیاد / تمرکز بالا)</label>
-        <div class="chips" id="chips_heavydays">
-          <div class="chip selected orange" data-val="Mo">Mo</div>
-          <div class="chip orange" data-val="Di">Di</div>
-          <div class="chip selected orange" data-val="Mi">Mi</div>
-          <div class="chip orange" data-val="Do">Do</div>
-          <div class="chip orange" data-val="Fr">Fr</div>
+        <label>چند روز در هفته؟</label>
+        <div class="range-wrap">
+          <input type="range" id="f_sport_days" min="2" max="6" value="3"
+                 oninput="updateRangeVal(this,'sport_days_val',' روز'); syncDPW(this.value)" />
+          <div class="range-val" id="sport_days_val">3 روز</div>
         </div>
       </div>
     </div>
-    <div class="field">
-      <label>پروژه جانبی / کدنویسی شخصی داری؟</label>
-      <div class="chips" id="chips_sideproject">
-        <div class="chip selected green" data-val="yes">بله</div>
-        <div class="chip green" data-val="no">خیر</div>
+
+    <!-- ── خوراک ── -->
+    <div class="domain-section" id="sec_food" data-domain="food">
+      <div class="sec-header"><span>🍎</span> خوراک</div>
+      <div class="field">
+        <label>چه نوع غذایی می‌خوری؟</label>
+        <div class="chips" id="chips_food_type">
+          <div class="chip selected" data-val="omni">🥩 همه‌چیزخور</div>
+          <div class="chip" data-val="veg">🌱 گیاهخوار</div>
+          <div class="chip" data-val="vegan">🥗 وگان</div>
+          <div class="chip" data-val="special">🍽️ رژیم خاص</div>
+        </div>
+      </div>
+      <div class="field">
+        <label>هدفت چیه؟</label>
+        <div class="chips" id="chips_food_goal">
+          <div class="chip" data-val="lose">📉 کاهش وزن</div>
+          <div class="chip selected" data-val="maintain">⚖️ حفظ وزن</div>
+          <div class="chip" data-val="gain">📈 افزایش وزن</div>
+        </div>
       </div>
     </div>
-    <div id="sideproject_fields">
-      <div class="row-2">
-        <div class="field"><label>شروع پروژه جانبی</label><input id="f_side_start" type="time" value="16:30" /></div>
-        <div class="field"><label>پایان پروژه جانبی</label><input id="f_side_end" type="time" value="18:30" /></div>
+
+    <!-- ── کار ── -->
+    <div class="domain-section" id="sec_work" data-domain="work">
+      <div class="sec-header"><span>💼</span> کار</div>
+      <div class="field">
+        <label>ساعت کاریت چه شکلیه؟</label>
+        <div class="chips" id="chips_work_type">
+          <div class="chip selected" data-val="fixed">🕗 ساعت ثابت</div>
+          <div class="chip" data-val="freelance">💻 فریلنسر</div>
+          <div class="chip" data-val="shift">🔄 شیفت متغیر</div>
+        </div>
       </div>
-      <div class="field"><label>نوع پروژه (اختیاری)</label><input id="f_side_name" placeholder="مثلاً توسعه وب‌اپ، یادگیری ماشین، ..." /></div>
+      <div class="field">
+        <label>روزهای شلوغت کدوماست؟</label>
+        <div class="chips" id="chips_work_busy">
+          <div class="chip" data-val="Sat">ش</div>
+          <div class="chip selected" data-val="Sun">ی</div>
+          <div class="chip selected" data-val="Mon">د</div>
+          <div class="chip selected" data-val="Tue">س</div>
+          <div class="chip selected" data-val="Wed">چ</div>
+          <div class="chip" data-val="Thu">پ</div>
+          <div class="chip" data-val="Fri">ج</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── زبان ── -->
+    <div class="domain-section" id="sec_language" data-domain="language">
+      <div class="sec-header"><span>📚</span> زبان</div>
+      <div class="field">
+        <label>چطور یاد می‌گیری؟</label>
+        <div class="chips" id="chips_lang_method">
+          <div class="chip" data-val="class">🎓 کلاس</div>
+          <div class="chip selected" data-val="self">📱 خودآموز</div>
+          <div class="chip" data-val="both">هر دو</div>
+        </div>
+      </div>
+      <div class="field">
+        <label>روزی چند دقیقه؟</label>
+        <div class="range-wrap">
+          <input type="range" id="f_lang_minutes" min="10" max="60" step="5" value="20"
+                 oninput="updateRangeVal(this,'lang_min_val',' دقیقه')" />
+          <div class="range-val" id="lang_min_val">20 دقیقه</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── هنر ── -->
+    <div class="domain-section" id="sec_art" data-domain="art">
+      <div class="sec-header"><span>🎨</span> هنر</div>
+      <div class="field">
+        <label>چطور تمرین می‌کنی؟</label>
+        <div class="chips" id="chips_art_method">
+          <div class="chip" data-val="class">🎓 کلاس</div>
+          <div class="chip selected" data-val="self">📚 خودآموز</div>
+          <div class="chip" data-val="both">هر دو</div>
+        </div>
+      </div>
+      <div class="field">
+        <label>چند روز در هفته؟</label>
+        <div class="range-wrap">
+          <input type="range" id="f_art_days" min="1" max="7" value="3"
+                 oninput="updateRangeVal(this,'art_days_val',' روز')" />
+          <div class="range-val" id="art_days_val">3 روز</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── هدف سفارشی ── -->
+    <div class="domain-section" id="sec_custom" data-domain="custom">
+      <div class="sec-header"><span>✏️</span> <span id="sec_custom_title">هدف شخصی</span></div>
+      <div class="field">
+        <label>چند روز در هفته می‌خوای وقت بذاری؟</label>
+        <div class="range-wrap">
+          <input type="range" id="f_custom_days" min="1" max="7" value="3"
+                 oninput="updateRangeVal(this,'custom_days_val',' روز')" />
+          <div class="range-val" id="custom_days_val">3 روز</div>
+        </div>
+      </div>
+      <div class="field">
+        <label>روزی چند دقیقه؟</label>
+        <div class="range-wrap">
+          <input type="range" id="f_custom_minutes" min="15" max="120" step="15" value="30"
+                 oninput="updateRangeVal(this,'custom_min_val',' دقیقه')" />
+          <div class="range-val" id="custom_min_val">30 دقیقه</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hidden defaults (for collectData compatibility) -->
+    <input id="f_gym_time"      type="hidden" value="07:00" />
+    <input id="f_gym_dur"       type="hidden" value="45" />
+    <input id="f_days_per_week" type="hidden" value="3" />
+    <div style="display:none">
+      <div class="chips" id="chips_lang"><div class="chip selected" data-val="fa">fa</div></div>
+      <div class="chips" id="chips_haswork"><div class="chip selected" data-val="yes">yes</div></div>
+      <div class="chips" id="chips_sideproject"><div class="chip selected" data-val="no">no</div></div>
+      <div class="option-cards" id="opt_goal"><div class="opt-card selected" data-val="bulk">bulk</div></div>
+      <input id="f_side_start" type="hidden" value="16:30" />
+      <input id="f_side_end"   type="hidden" value="18:30" />
+      <input id="f_side_name"  type="hidden" value="پروژه جانبی" />
+      <div class="chips" id="chips_activity"><div class="chip selected" data-val="1.55">1.55</div></div>
+      <div class="chips" id="chips_cardio"><div class="chip selected" data-val="hiit">hiit</div></div>
+      <div class="chips" id="chips_diet"><div class="chip selected" data-val="omni">omni</div></div>
+      <div class="chips" id="chips_workdays">
+        <div class="chip selected" data-val="Mo">Mo</div><div class="chip selected" data-val="Di">Di</div>
+        <div class="chip selected" data-val="Mi">Mi</div><div class="chip selected" data-val="Do">Do</div>
+        <div class="chip selected" data-val="Fr">Fr</div>
+      </div>
+      <div class="chips" id="chips_heavydays">
+        <div class="chip selected" data-val="Mo">Mo</div><div class="chip selected" data-val="Mi">Mi</div>
+      </div>
+      <div class="option-cards" id="opt_split"><div class="opt-card selected" data-val="ppl">ppl</div></div>
+      <input id="f_avoid" value="" />
     </div>
   </div>
 
-  <!-- STEP 3: Fitness Goal -->
+  <!-- STEP 3: جزئیات نهایی -->
   <div class="step-panel" id="step-3">
-    <div class="step-heading">🏋️ هدف ورزشی</div>
-    <div class="step-sub">هدفت از ورزش چیه و چقدر می‌خوای تمرین کنی؟</div>
+    <div class="step-heading">🎯 چند جزئیات آخر</div>
+    <div class="step-sub">آخرین قدم — بعدش داشبوردت آماده‌ست</div>
+
+    <!-- ── بهره‌ورترین ساعت (همیشه نشون داده می‌شه) ── -->
     <div class="field">
-      <label>هدف اصلی <span>*</span></label>
-      <div class="option-cards" id="opt_goal">
-        <div class="opt-card selected" data-val="bulk"><span class="opt-icon">💪</span><div class="opt-text"><h4>Bulk — عضله‌سازی</h4><p>هدف اضافه کردن عضله با کالری مازاد</p></div></div>
-        <div class="opt-card" data-val="cut"><span class="opt-icon">🔥</span><div class="opt-text"><h4>Cut — چربی‌سوزی</h4><p>هدف کاهش چربی با حفظ عضله</p></div></div>
-        <div class="opt-card" data-val="maintain"><span class="opt-icon">⚖️</span><div class="opt-text"><h4>Maintain — حفظ فرم</h4><p>حفظ وزن و بدن فعلی</p></div></div>
+      <label>⚡ بهره‌ورترین ساعت روزت کِیه؟</label>
+      <div class="chips" id="chips_peak_time">
+        <div class="chip" data-val="early">🌅 خیلی صبح</div>
+        <div class="chip selected" data-val="morning">☀️ صبح</div>
+        <div class="chip" data-val="afternoon">🌤️ عصر</div>
+        <div class="chip" data-val="evening">🌙 شب</div>
       </div>
     </div>
-    <div class="field">
-      <label>دسترسی به تجهیزات ورزشی <span>*</span></label>
-      <div class="option-cards" id="opt_gym">
-        <div class="opt-card selected" data-val="full"><span class="opt-icon">🏋️</span><div class="opt-text"><h4>باشگاه کامل</h4><p>دسترسی به دمبل، هالتر، دستگاه‌های سنگین</p></div></div>
-        <div class="opt-card" data-val="home"><span class="opt-icon">🏠</span><div class="opt-text"><h4>خانه با تجهیزات</h4><p>دمبل، کش، میله — بدون دستگاه سنگین</p></div></div>
-        <div class="opt-card" data-val="bodyweight"><span class="opt-icon">🤸</span><div class="opt-text"><h4>فقط وزن بدن</h4><p>کالیستنیکس — بدون هیچ تجهیزاتی</p></div></div>
-      </div>
-    </div>
-    <div class="row-2">
+
+    <!-- ── ورزش: زمان‌بندی ── -->
+    <div class="s3-sec" id="sec3_sport">
+      <div class="sec-header"><span>🏋️</span> ورزش — زمان‌بندی</div>
       <div class="field">
-        <label>ساعت تمرین</label>
-        <input id="f_gym_time" type="time" value="06:00" />
+        <label>کِی ورزش می‌کنی؟</label>
+        <div class="chips" id="chips_gym_pref">
+          <div class="chip" data-val="early">🌅 صبح زود (۵-۷)</div>
+          <div class="chip selected" data-val="morning">☀️ صبح (۷-۱۰)</div>
+          <div class="chip" data-val="afternoon">🌤️ عصر (۱۲-۱۵)</div>
+          <div class="chip" data-val="evening">🌙 بعد از کار</div>
+        </div>
       </div>
       <div class="field">
-        <label>مدت هر جلسه (دقیقه)</label>
-        <select id="f_gym_dur">
-          <option value="30">۳۰ دقیقه</option>
-          <option value="45" selected>۴۵ دقیقه</option>
-          <option value="60">۶۰ دقیقه</option>
-          <option value="75">۷۵ دقیقه</option>
-          <option value="90">۹۰ دقیقه</option>
-        </select>
+        <label>📅 کدوم روزها ورزش می‌کنی؟</label>
+        <div class="chips" id="chips_sport_exact_days">
+          <div class="chip" data-val="Sat">ش</div>
+          <div class="chip selected" data-val="Sun">ی</div>
+          <div class="chip selected" data-val="Mon">د</div>
+          <div class="chip" data-val="Tue">س</div>
+          <div class="chip selected" data-val="Wed">چ</div>
+          <div class="chip" data-val="Thu">پ</div>
+          <div class="chip" data-val="Fri">ج</div>
+        </div>
       </div>
     </div>
-    <div class="field">
-      <label>تعداد روزهای تمرین در هفته <span>*</span></label>
-      <div class="range-wrap">
-        <input type="range" id="f_days_per_week" min="2" max="6" value="4" oninput="updateDPW(this.value)" />
-        <div class="range-val" id="dpw_val">۴ روز</div>
-      </div>
-    </div>
-    <div class="field">
-      <label>سطح فعالیت فعلی</label>
-      <div class="chips" id="chips_activity">
-        <div class="chip" data-val="1.2">خیلی کم</div>
-        <div class="chip" data-val="1.375">کم</div>
-        <div class="chip selected green" data-val="1.55">متوسط</div>
-        <div class="chip green" data-val="1.725">زیاد</div>
-        <div class="chip green" data-val="1.9">خیلی زیاد</div>
-      </div>
-    </div>
-  </div>
 
-  <!-- STEP 4: Training Split -->
-  <div class="step-panel" id="step-4">
-    <div class="step-heading">📋 برنامه تمرینی</div>
-    <div class="step-sub">بر اساس اطلاعاتت، یه پیشنهاد آماده کردیم. می‌تونی تغییرش بدی.</div>
-    <div class="field">
-      <label>نوع اسپلیت <span>*</span></label>
-      <div class="option-cards" id="opt_split">
-        <div class="opt-card selected" data-val="ppl"><span class="opt-icon">🔄</span><div class="opt-text"><h4>PPL — Push / Pull / Legs</h4><p>بهترین برای ۴–۶ روز / هفته — تمرکز بالا روی هر عضله</p></div></div>
-        <div class="opt-card" data-val="upper_lower"><span class="opt-icon">⬆️</span><div class="opt-text"><h4>Upper / Lower</h4><p>بهترین برای ۴ روز / هفته — هر عضله ۲ بار در هفته</p></div></div>
-        <div class="opt-card" data-val="fullbody"><span class="opt-icon">💥</span><div class="opt-text"><h4>Full Body</h4><p>بهترین برای ۳ روز / هفته — همه عضلات هر جلسه</p></div></div>
-        <div class="opt-card" data-val="bro"><span class="opt-icon">💪</span><div class="opt-text"><h4>Bro Split</h4><p>هر روز یه عضله — برای ۵–۶ روز / هفته</p></div></div>
+    <!-- ── اطلاعات بدن (ورزش یا خوراک) ── -->
+    <div class="s3-sec" id="sec3_body">
+      <div class="sec-header"><span>📏</span> اطلاعات بدن</div>
+      <div class="field">
+        <label>جنسیت</label>
+        <div class="chips" id="chips_gender">
+          <div class="chip selected" data-val="male">👨 مرد</div>
+          <div class="chip" data-val="female">👩 زن</div>
+        </div>
+      </div>
+      <div class="row-2">
+        <div class="field">
+          <label>قد (cm)</label>
+          <input id="f_height" type="number" value="175" min="140" max="220" oninput="debouncedSave()" />
+        </div>
+        <div class="field">
+          <label>وزن (kg)</label>
+          <input id="f_weight" type="number" value="75" min="40" max="200" oninput="debouncedSave()" />
+        </div>
       </div>
     </div>
-    <div class="field">
-      <label>پیش‌نمایش برنامه هفتگی</label>
-      <div class="week-plan" id="weekPlanPreview"></div>
-    </div>
-    <div class="field">
-      <label>آیا کاردیو جداگانه می‌خوای؟</label>
-      <div class="chips" id="chips_cardio">
-        <div class="chip selected green" data-val="hiit">HIIT (۲۰–۳۰ دق)</div>
-        <div class="chip green" data-val="liss">LISS — آهسته‌پا (۳۰–۴۵ دق)</div>
-        <div class="chip green" data-val="none">نه ممنون</div>
-      </div>
-    </div>
-  </div>
 
-  <!-- STEP 5: Nutrition -->
-  <div class="step-panel" id="step-5">
-    <div class="step-heading">🍽 تغذیه</div>
-    <div class="step-sub">سبک غذاییت رو مشخص کن — اهداف کالری رو خودکار حساب می‌کنیم.</div>
-    <div class="field">
-      <label>رژیم غذایی</label>
-      <div class="chips" id="chips_diet">
-        <div class="chip selected green" data-val="omni">همه‌چیزخوار</div>
-        <div class="chip green" data-val="veg">گیاه‌خوار</div>
-        <div class="chip green" data-val="vegan">وگان</div>
-        <div class="chip green" data-val="halal">حلال</div>
+    <!-- ── خوراک: وعده‌ها ── -->
+    <div class="s3-sec" id="sec3_food">
+      <div class="sec-header"><span>🍎</span> خوراک — وعده‌ها</div>
+      <div class="field">
+        <label>🍽️ روزی چند وعده؟</label>
+        <div class="chips" id="chips_meal_count">
+          <div class="chip" data-val="2">۲ وعده</div>
+          <div class="chip" data-val="3">۳ وعده</div>
+          <div class="chip selected" data-val="4">۴ وعده</div>
+          <div class="chip" data-val="5">۵ وعده</div>
+        </div>
+      </div>
+      <div class="row-2">
+        <div class="field">
+          <label>⏰ صبحانه</label>
+          <input id="f_breakfast_time" type="time" value="07:30" oninput="debouncedSave()" />
+        </div>
+        <div class="field">
+          <label>⏰ شام</label>
+          <input id="f_dinner_time" type="time" value="19:00" oninput="debouncedSave()" />
+        </div>
       </div>
     </div>
-    <div class="field">
-      <label>غذاهایی که نمی‌خوری / آلرژی (اختیاری)</label>
-      <input id="f_avoid" placeholder="مثلاً گلوتن، لبنیات، ..." />
-    </div>
-    <div class="field">
-      <label>تعداد وعده‌های روزانه</label>
-      <div class="chips" id="chips_meals">
-        <div class="chip green" data-val="3">۳ وعده</div>
-        <div class="chip selected green" data-val="5">۴–۵ وعده</div>
-        <div class="chip green" data-val="6">۶ وعده</div>
-      </div>
-    </div>
-    <div class="field">
-      <label>زمان صبحانه</label>
-      <input id="f_breakfast_time" type="time" value="07:00" />
-    </div>
-    <div class="field">
-      <label>زمان شام</label>
-      <input id="f_dinner_time" type="time" value="18:30" />
-    </div>
-    <div id="cal_preview_wrap"></div>
-  </div>
 
-  <!-- STEP 6: Daily Routine & Habits -->
-  <div class="step-panel" id="step-6">
-    <div class="step-heading">🌅 روتین روزانه</div>
-    <div class="step-sub">ساعت خواب و بیداری + عادت‌هایی که می‌خوای دنبال کنی.</div>
-    <div class="row-2">
-      <div class="field"><label>ساعت بیداری</label><input id="f_wake" type="time" value="05:00" /></div>
-      <div class="field"><label>ساعت خواب</label><input id="f_sleep" type="time" value="22:00" /></div>
-    </div>
-    <div class="field">
-      <label>هدف خواب (ساعت)</label>
-      <div class="range-wrap">
-        <input type="range" id="f_sleep_hours" min="6" max="9" step="0.5" value="7.5" oninput="document.getElementById('sh_val').textContent=this.value+'h'" />
-        <div class="range-val" id="sh_val">7.5h</div>
+    <!-- ── کار: ساعات ── -->
+    <div class="s3-sec" id="sec3_work">
+      <div class="sec-header"><span>💼</span> کار — ساعات</div>
+      <div id="work_fixed_times">
+        <div class="row-2">
+          <div class="field">
+            <label>🕗 شروع کار</label>
+            <input id="f_work_start" type="time" value="09:00" oninput="debouncedSave()" />
+          </div>
+          <div class="field">
+            <label>🕕 پایان کار</label>
+            <input id="f_work_end" type="time" value="17:00" oninput="debouncedSave()" />
+          </div>
+        </div>
+      </div>
+      <div id="work_freelance_tip" style="display:none">
+        <div class="tip">✨ برای فریلنسرا، سامان بر اساس بهره‌ورترین ساعت روزت کارها رو تنظیم می‌کنه</div>
       </div>
     </div>
+
+    <!-- ── زبان: برنامه ── -->
+    <div class="s3-sec" id="sec3_language">
+      <div class="sec-header"><span>📚</span> زبان — برنامه</div>
+      <div id="lang_class_schedule">
+        <div class="field">
+          <label>📅 روزهای کلاس</label>
+          <div class="chips" id="chips_lang_class_days">
+            <div class="chip" data-val="Sat">ش</div>
+            <div class="chip" data-val="Sun">ی</div>
+            <div class="chip selected" data-val="Mon">د</div>
+            <div class="chip" data-val="Tue">س</div>
+            <div class="chip selected" data-val="Wed">چ</div>
+            <div class="chip" data-val="Thu">پ</div>
+            <div class="chip" data-val="Fri">ج</div>
+          </div>
+        </div>
+        <div class="field">
+          <label>🕗 ساعت کلاس</label>
+          <input id="f_lang_class_time" type="time" value="18:00" oninput="debouncedSave()" />
+        </div>
+      </div>
+      <div id="lang_self_schedule" style="display:none">
+        <div class="field">
+          <label>⏰ ترجیحاً کِی تمرین کنی؟</label>
+          <div class="chips" id="chips_lang_time_pref">
+            <div class="chip" data-val="morning">☀️ صبح</div>
+            <div class="chip selected" data-val="evening">🌙 شب</div>
+            <div class="chip" data-val="lunch">🌤️ وسط روز</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── هنر: برنامه ── -->
+    <div class="s3-sec" id="sec3_art">
+      <div class="sec-header"><span>🎨</span> هنر — برنامه</div>
+      <div id="art_class_schedule">
+        <div class="field">
+          <label>📅 روزهای کلاس</label>
+          <div class="chips" id="chips_art_class_days">
+            <div class="chip" data-val="Sat">ش</div>
+            <div class="chip" data-val="Sun">ی</div>
+            <div class="chip" data-val="Mon">د</div>
+            <div class="chip selected" data-val="Tue">س</div>
+            <div class="chip" data-val="Wed">چ</div>
+            <div class="chip selected" data-val="Thu">پ</div>
+            <div class="chip" data-val="Fri">ج</div>
+          </div>
+        </div>
+        <div class="field">
+          <label>🕗 ساعت کلاس</label>
+          <input id="f_art_class_time" type="time" value="17:00" oninput="debouncedSave()" />
+        </div>
+      </div>
+      <div id="art_self_schedule" style="display:none">
+        <div class="field">
+          <label>⏰ ترجیحاً کِی تمرین کنی؟</label>
+          <div class="chips" id="chips_art_time_pref">
+            <div class="chip selected" data-val="morning">☀️ صبح</div>
+            <div class="chip" data-val="evening">🌙 شب</div>
+            <div class="chip" data-val="lunch">🌤️ وسط روز</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── هدف سفارشی: برنامه ── -->
+    <div class="s3-sec" id="sec3_custom">
+      <div class="sec-header"><span>✏️</span> <span id="sec3_custom_title">هدف شخصی</span> — برنامه</div>
+      <div class="field">
+        <label>⏰ ترجیحاً کِی؟</label>
+        <div class="chips" id="chips_custom_time_pref">
+          <div class="chip selected" data-val="morning">☀️ صبح</div>
+          <div class="chip" data-val="afternoon">🌤️ عصر</div>
+          <div class="chip" data-val="evening">🌙 شب</div>
+        </div>
+      </div>
+      <div class="field">
+        <label>📅 کدوم روزها؟</label>
+        <div class="chips" id="chips_custom_exact_days">
+          <div class="chip" data-val="Sat">ش</div>
+          <div class="chip selected" data-val="Sun">ی</div>
+          <div class="chip selected" data-val="Mon">د</div>
+          <div class="chip selected" data-val="Tue">س</div>
+          <div class="chip" data-val="Wed">چ</div>
+          <div class="chip" data-val="Thu">پ</div>
+          <div class="chip" data-val="Fri">ج</div>
+        </div>
+      </div>
+    </div>
+
     <div class="divider"></div>
-    <div class="section-label">✅ عادت‌های روزانه</div>
-    <div class="tip">💡 <strong>پیشنهاد:</strong> حداکثر ۸ عادت. ساده و قابل اندازه‌گیری باشن.</div>
-    <div class="habit-builder" id="habitBuilder"></div>
-    <button class="add-habit-btn" onclick="addHabit()">+ افزودن عادت جدید</button>
-
-    <div class="divider"></div>
+    <!-- ── اعلان روزانه ── -->
     <div class="section-label">🔔 یادآور روزانه</div>
     <div class="notif-card" id="notifCard">
       <div class="notif-row">
@@ -311,14 +517,6 @@
       </div>
       <div class="notif-status" id="notifStatus"></div>
     </div>
-  </div>
-
-  <!-- STEP 7: Review -->
-  <div class="step-panel" id="step-7">
-    <div class="step-heading">✅ مرور نهایی</div>
-    <div class="step-sub">همه چیز رو یه بار نگاه کن، بعد داشبوردت رو بساز!</div>
-    <div class="summary-grid" id="summaryGrid"></div>
-    <div id="finalCalPreview"></div>
   </div>
 
 </div><!-- end form-wrap -->

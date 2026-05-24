@@ -57,6 +57,27 @@ body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:var(--bg);color:v
 .chip.green.selected{background:var(--green-d);border-color:var(--green);color:var(--green)}
 .chip.orange.selected{background:#3d1a0a;border-color:var(--orange);color:var(--orange)}
 
+/* ── DOMAIN CHIPS (Step 1 — large) ── */
+.chips-domains{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:6px}
+.chip-domain{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:14px;border:2px solid var(--border2);background:var(--bg1);color:var(--text2);cursor:pointer;font-size:0.9rem;font-weight:600;font-family:inherit;transition:all .2s;user-select:none;text-align:right}
+.chip-domain .cd-icon{font-size:1.6rem;flex-shrink:0}
+.chip-domain .cd-text{flex:1}
+.chip-domain .cd-check{width:18px;height:18px;border-radius:50%;border:2px solid var(--border2);flex-shrink:0;transition:all .2s;display:flex;align-items:center;justify-content:center;font-size:0.65rem}
+.chip-domain.selected{border-color:var(--blue);background:var(--blue-d);color:var(--blue)}
+.chip-domain.selected .cd-check{background:var(--blue);border-color:var(--blue);color:var(--bg)}
+.chip-domain.selected .cd-check::after{content:'✓';font-weight:700}
+
+/* micro-celebration */
+@keyframes chipPop{0%{transform:scale(1)}35%{transform:scale(1.06)}65%{transform:scale(.97)}100%{transform:scale(1)}}
+@keyframes shimmer{0%{opacity:1}50%{opacity:.6}100%{opacity:1}}
+.chip-domain.celebrate{animation:chipPop .35s ease,shimmer .35s ease}
+
+/* custom chip input */
+.chip-custom .cd-custom-input{display:none;flex:1;background:transparent;border:none;outline:none;color:var(--text);font-size:0.88rem;font-family:inherit;min-width:0;direction:rtl}
+.chip-custom.editing .cd-text{display:none}
+.chip-custom.editing .cd-custom-input{display:block}
+.chip-custom.editing{border-color:var(--blue);background:rgba(96,165,250,.08)}
+
 /* ── OPTION CARDS ── */
 .option-cards{display:flex;flex-direction:column;gap:8px}
 .opt-card{padding:12px 14px;border-radius:12px;border:2px solid var(--border);background:var(--bg1);cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:12px}
@@ -67,6 +88,22 @@ body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:var(--bg);color:v
 .opt-card .opt-text p{font-size:0.69rem;color:var(--text3);line-height:1.4}
 .opt-card.selected .opt-text h4{color:var(--blue)}
 .opt-card.selected .opt-text p{color:#7cb9f5}
+
+/* ── DOMAIN SECTIONS (Step 2) ── */
+.domain-section{display:none;margin-top:20px;padding-top:18px;border-top:1px solid var(--border)}
+.domain-section.visible{display:block}
+
+/* ── STEP 3 SECTIONS ── */
+.s3-sec{display:none;margin-top:20px;padding-top:18px;border-top:1px solid var(--border)}
+.s3-sec.visible{display:block}
+.sec-header{display:flex;align-items:center;gap:8px;font-size:0.88rem;font-weight:700;color:var(--blue);margin-bottom:14px;letter-spacing:.3px}
+.sec-header span:first-child{font-size:1.1rem}
+
+/* ── SLEEP BLOCK ── */
+.sleep-block{background:var(--bg1);border:1px solid var(--border);border-radius:var(--radius);padding:16px}
+.sleep-row{display:flex;flex-direction:column;gap:14px}
+.wake-result{margin-top:14px;padding:10px 14px;background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.25);border-radius:10px;font-size:0.82rem;color:var(--text2);text-align:center}
+.wake-result strong{color:var(--green);font-size:1rem}
 
 /* ── RANGE SLIDER ── */
 .range-wrap{display:flex;align-items:center;gap:10px}
